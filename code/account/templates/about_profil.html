@@ -1,0 +1,124 @@
+{% extends 'base_account.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}
+
+تعديل الملف الشخصي
+
+{% endblock %}
+
+
+{% block header %}
+    {% include 'include/header_mobile.html' %}
+    {% include 'include/header.html' %}
+{% endblock %}
+
+{% block body %}
+
+
+<div class=" center-auto top40">
+    <div id="container-form" class="relative white border center-auto hidden" data-type="h">
+       <div id="left-form" class="full-width white">
+           <div id="form-page">
+                
+                
+                <form id="form-company" class="form-slider" action="{{ request.get_full_path }}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    
+                    <div class="slider-form-container relative">
+                        <div class="slide-form left">
+                                <div class="inputs box40 white">
+                                    <h1 class="light bottom30">
+                                        تعديل الملف الشخصي
+                                    </h1>
+                                    {% if message %}
+                                       <div class="notice {{status}}">{{message}}</div>
+                                    {% endif %}
+
+
+                                   <div id="container-upload" class="relative bottom20">
+                                       <div id="upload-space" class="relative box-drag-drop">
+                                           <input type="file" class="input-file-standard" name="photo" accept=".jpg, .jpeg, .png, .gif" />
+                                           <input type="hidden" class=" input-base64" data-rule="string" name="photo_base64" />
+                                            <div class="message-error-metric errors-message box26 align-center none"><h2></h2></div>
+                                            <div class="align-center absolute drag-background font18">
+                                                    انقر لتحميل صورة<br />
+                                                    <span class="font13">التنسيقات المقبولة : *.jpg, *.png, *.gif</span>
+                                                </div>
+                                            <div id="" class="row relative parent-children">
+                                                <div class="clr"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <p class="{% if form.errors.gender %}error-p{% endif %}">
+                                    <label>
+
+                                        الجنس
+
+                                        </label>
+                                    <select name="gender" data-rule="string" value="{{form.gender.value|default_if_none:""}}" class="required {% if form.errors.gender %}error{% endif %}">
+                                        <option value="">
+
+                                            اختر الجنس
+
+                                            </option>
+                                        <option value="man">
+
+                                            رجل
+
+                                            </option>
+                                        <option value="woman">
+
+                                            امراءة
+
+                                            </option>
+                                        <option value="other">
+
+                                            آخر
+
+                                            </option>
+                                    </select>
+                                    {% if form.errors.gender %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.gender|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.about %}error-p{% endif %}">
+                                        <label>
+
+                                            معلومات عني
+
+                                            </label>
+                                        <textarea type="text" name="about" class="{% if form.errors.about %}error{% endif %}" data-rule="string">{{form.about.value|default_if_none:''}}</textarea>
+                                        {% if form.errors.about %}
+                                            <span class="message-error-input"><span class="inline-block">{{form.errors.about|striptags}}</span></span>
+                                        {% endif %}
+                                    </p>
+                                <div class="align-center top30 bottom30">
+
+                                   <input type="submit" value='حفظ التغييرات' id="btn_update" class="border-green" />
+                                </div>
+
+
+                               </div>
+                            <div class="clr"></div>
+                        </div>
+                    </div>
+                   
+                   
+                    
+                   
+                   
+                </form>
+               
+               
+               
+           </div><!-- box30 -->
+        </div><!-- left-form -->
+        <div class="clr"></div>
+    </div><!-- container-form -->
+</div> 
+
+{% endblock %}
+
+

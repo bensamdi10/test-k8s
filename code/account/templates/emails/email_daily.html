@@ -1,0 +1,51 @@
+{% extends "base_email.html" %}
+{% load static i18n thumbnail %}
+{% get_current_language as LANGUAGE_CODE %}
+
+
+
+{% block header %}
+                    
+    {% include "include_email/header_email.html" with header_text_1="السلام عليكم و مرحبا بكم" header_text_2=profil.name  %}
+
+{% endblock %}
+
+{% block img_header %}{% endblock %}
+
+ {% block image %}{% endblock %}
+
+{% block content %}
+
+    {% for article in articles %}
+
+        {% if forloop.counter == 1 %}
+            {% include "include_email/first_article.html"  %}
+
+        {% else %}
+            {% include "include_email/article.html"  %}
+
+        {% endif %}
+
+    {% endfor %}
+
+
+
+
+    <tr>
+        <td valign="top" width="30" height="30" style="font-size:0%; border:none; line-height:0;">&nbsp;</td>
+        <td valign="top" width="540" style="text-align: center;">
+            <a href="{{domain}}/account/custom-centres/{{profil.id}}/?update=1" target="_blank">
+                <img src="{{domain}}/static/images/emails/btn_custom_centres.png"  style="font-size: 0%; border: none; line-height: 0;" /></a>
+        </td>
+        <td valign="top" width="30" height="30" style="font-size:0%; border:none; line-height:0;">&nbsp;</td>
+    </tr>
+
+
+    <tr>
+        <td valign="top" width="30" height="30" style="font-size:0%; border:none; line-height:0;">&nbsp;</td>
+        <td valign="top" width="540" height="30" style="font-size:0%; border:none; line-height:0;">&nbsp;</td>
+        <td valign="top" width="30" height="30" style="font-size:0%; border:none; line-height:0;">&nbsp;</td>
+    </tr>
+
+{% endblock %}
+

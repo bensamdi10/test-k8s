@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+backoffLimit: '5'
+kind: Job
+metadata:
+    name: migration-job-update
+spec:
+    template:
+        spec:
+            containers:
+            -   args: python manage.py migrate
+                container:
+                    args: python /app/plateforme/manage.py runserver 8000
+                    command: /bin/sh
+                    env:
+                    -   name: HOST
+                        value: localhost
+                    -   name: port
+                        value: '4532'
+                    -   name: DB_NAME_PLATEFORME
+                        value: plateforme
+                    -   name: DB_NAME_DB
+                        value: plateforme_db
+                    -   name: PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                key: PASSWORD
+                                name: PASSWORD
+                    image: said10/plateforme
+                    name: plateforme
+                    ports:
+                    -   containerPort: '8000'
+                    volumeMounts:
+                    -   mountPath: /etc/app
+                        name: ''
+                        subPath: app
+                dockerfile:
+                    content: 'FROM python:3.8
+
+
+                        RUN apt-get update
+
+
+                        COPY . .
+
+
+                        RUN pip install -r requirements.txt
+
+
+                        COPY envs/settings plateforme/cms
+
+
+                        USER root
+
+
+                        '
+                    uid: '49313144'
+            restartPolicy: OnFailure

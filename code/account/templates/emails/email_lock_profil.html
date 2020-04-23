@@ -1,0 +1,22 @@
+{% extends "base_email.html" %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+
+
+{% block header %}
+                    
+    {% include "include_email/header_email.html" with header_text_1="السلام عليكم" header_text_1=profil_name  %}
+
+{% endblock %}
+
+{% block img_header %}
+    <img src="http://recto-post.com/static/images/emails/lock_email.png" />
+{% endblock %}
+
+{% block content %}
+                    
+    {% include "include_email/content_email.html" with content="<p>لقد تم خرق شروط الإستخدام لمنصة "ريكتو بوست" عدة مرات، لهذا إرتاءت إدارة المنصة لإقفال حسابكم</p><p>إن كان هناك خطأ من طرفنا المرجو الإتصال بإدارة المنصة عن طريق النقر على الرابط أسفلاه</p>" url_btn=url_redirection img_btn="https://recto-post.com/static/images/emails/bouton_contact.png" %}
+
+{% endblock %}
+

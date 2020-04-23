@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+
+{% block side_column %}
+<div class="info-item">
+    <span class="bold">Name : </span>{{environnement.name}}
+</div>
+<div class="info-item">
+    <span class="bold">Type : </span> {{environnement.type}}
+</div>
+<div class="info-item">
+    <span class="bold">Status : </span> {{environnement.status}}
+</div>
+<div class="info-item">
+    <span class="bold">Nbr of Containers : </span>  {{environnement.container_count}}
+</div>
+<div class="info-item">
+    <span class="bold">Nbr of Services : </span> {{services|length}}
+</div>
+<div class="info-item">
+    <span class="bold">List of Services : </span>
+</div>
+
+    {% for service in services %}
+    <div class="info-item sub">
+        {{service.name}} <span class="bold">{{service.type}}</span>
+    </div>
+    {% endfor %}
+<div class="info-item">
+    <span class="bold">Nbr of ENV Variables : </span> {{variables|length}}
+</div>
+<div class="info-item">
+    <span class="bold">List of ENV Variables :  </span>
+</div>
+    
+    {% for variable in variables %}
+        <div class="info-item sub">
+            {{variable.name}}
+        </div>
+    {% endfor %}
+
+
+{% endblock %}
+
+{% block left_main %}
+{% if ingress %}
+<div class="component-container relative white shadow ingress">
+    <div class="header-component box15 relative">
+        <div class="align-center bold">Ingress Service</div>
+        <div class="option-component absolute fade-hover"></div>
+        <div class="sub-menu-options absolute white shadow">
+            <ul>
+                <li class="action-icon edit animate btn-action" data-action="edit" data-element="ingress" data-uid="{{ingress.uid}}">Edit Ingress</li>
+                <li class="action-icon template animate btn-action" data-action="save" data-element="template" data-uid="{{ingress.uid}}" data-parent="ingress">Save As Template</li>
+                <li class="action-icon remove animate btn-action" data-action="remove" data-element="ingress" data-uid="{{ingress.uid}}">Remove Ingress</li>
+            </ul>
+        </div>
+    </div> <!-- header-component --->
+    <div class="config-component relative box15">
+        <div class="item-config relative">
+            Domain : <span class="bold">{{ingress.domain|default:"-"}}</span> 
+        </div>
+        <div class="item-config relative">
+            Accept TLS : 
+            
+            <div class="switcher {% if ingress.accept_tls %}active{% endif %} right btn-inline-action" data-element="ingress" data-uid="{{ingress.uid}}" data-value="accept_tls" data-yes="Yes" data-no="No">
+                   <div class="handler animate"></div>
+                   <div class="text-handler animate">{% if ingress.accept_tls %}Yes{% else %}No{% endif %}</div>
+                   <input type="hidden" name="accept_tls" value="{% if ingress.accept_tls %}true{% else %}false{% endif %}" />
+            </div>
+            
+            <div class="clr"></div>
+            
+        </div>
+        
+        <div class="item-config relative">
+            Accept SSL : 
+            
+            <div class="switcher {% if ingress.accept_ssl %}active{% endif %} right btn-inline-action" data-element="ingress" data-uid="{{ingress.uid}}" data-value="accept_ssl" data-yes="Yes" data-no="No">
+                   <div class="handler animate"></div>
+                   <div class="text-handler animate">{% if ingress.accept_ssl %}Yes{% else %}No{% endif %}</div>
+                   <input type="hidden" name="accept_ssl" value="{% if ingress.accept_ssl %}true{% else %}false{% endif %}" />
+            </div>
+            
+            <div class="clr"></div>
+            
+        </div>
+        
+        <div class="item-config relative">
+            Ip Address : <span class="bold ip-adress-ingress"></span> 
+        </div>
+        
+        <div class="item-config relative">
+            Port : <span class="bold">{{ingress.port|default:'-'}}</span> 
+        </div>
+        {% if ingress.path|length > 0 %}
+            <div class="item-config relative">
+                Path :
+                <ul>
+                    {% for path in ingress.path %}
+                        <li>{{path.container_path}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+    </div><!-- config-component -->
+</div>   <!-- component-container -->
+
+
+
+{% for service in services %}
+
+<div class="component-container relative white shadow service {{service.type}}">
+    <div class="header-component box15 relative">
+        <div class="align-center bold">{{service.name}}</div>
+        <div class="option-component absolute fade-hover"></div>
+        <div class="sub-menu-options absolute white shadow">
+            <ul>
+                <li class="action-icon edit animate btn-action" data-action="edit" data-element="service" data-uid="{{service.uid}}">Edit Service</li>
+                <li class="action-icon template animate btn-action" data-action="save" data-element="template" data-uid="{{service.uid}}" data-parent="service">Save As Template</li>
+                <li class="action-icon remove animate btn-action" data-action="remove" data-element="service" data-uid="{{service.uid}}">Remove Service</li>
+            </ul>
+        </div>
+    </div> <!-- header-component --->
+    <div class="config-component relative box15">
+        <div class="item-config relative">
+            Type : <span class="bold">{{service.type|default:"-"}}</span> 
+        </div>
+        
+        <div class="item-config relative">
+            On Branch : <span class="bold">{{service.on_branch|default:'-'}}</span> 
+        </div>
+
+    </div><!-- config-component -->
+</div>   <!-- component-container -->
+
+
+{% endfor %}
+{% endif %}
+
+{% endblock %}
+
+
+{% block center_main %}
+
+    {% for deployment in deployments %}
+        <div class="deployment-service relative">
+            
+            
+            <div class="component-deployment relative shadow white left widget-parent-event" data-slug="{{deployment.slug}}">
+                
+                <div class="component-cluster relative left align-center">
+                    {{deployment.cluster_ip.name}}
+                    <div class="top10 relative ">
+                        <label class="bold">Port of Cluster Ip</label>
+                        <div class="center-auto relative">
+                             <input type="text" name="port_cluster_ip" value="{{deployment.cluster_ip.port}}" placeholder="Example : 3000" data-rule="number" class="required" />
+                            <span class="btn-inline-action validate-input fade-hover" data-element="deployment" data-uid="{{deployment.uid}}"></span>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="deployment-elements">
+                        <div class="menu-option-widget absolute shadow animate open">
+                        <ul class="horizontal">
+                            <li class="btn-action-env restart fade-hover pointer" data-action="restart-deployment" data-element="deployment" data-uid="{{deployment.uid}}" data-slug="{{deployment.slug}}">Restart</li>
+                            <li class="btn-action-env delete fade-hover pointer" data-action="delete-deployment" data-element="deployment" data-uid="{{deployment.uid}}" data-slug="{{deployment.slug}}">Delete</li>
+                            <li class="btn-action-env journal fade-hover pointer" data-action="journal-deployment" data-element="deployment" data-uid="{{deployment.uid}}" data-slug="{{deployment.slug}}">Journal</li>
+                        </ul>
+                        <div class="clr"></div>
+                    </div>
+
+                    <div class="header-component box15 relative">
+
+                        <div class="status-element  absolute" data-element="deployment" data-uid="{{deployment.uid}}">
+                            <div class="notif-message-status"><span class="text-notif">State of element is Down</span><span></span></div>
+                        </div> 
+
+                        <div class="align-center bold">{{deployment.name}}</div>
+                        <div class="option-component absolute fade-hover"></div>
+                        <div class="sub-menu-options absolute white shadow">
+                            <ul>
+                                <li class="action-icon edit animate btn-action" data-action="edit" data-element="deployment" data-uid="{{deployment.uid}}">Edit Deployment</li>
+                                <li class="action-icon container animate btn-action" data-action="add" data-element="container" data-parent="{{deployment.uid}}">Add New Container</li>
+                                <li class="action-icon container animate btn-action fill" data-action="add-existed" data-element="container" data-parent="{{deployment.uid}}">Add Existed Container</li>
+                                <li class="action-icon volume animate btn-action" data-action="add" data-element="volume" data-parent="{{deployment.uid}}">Add Persistent Volume Claim</li>
+                                <li class="action-icon volume animate btn-action fill" data-action="add-existed" data-element="volume" data-parent="{{deployment.uid}}">Add Existed Persistent Volume Claim</li>
+
+                                <li class="action-icon remove animate btn-action" data-action="remove" data-element="deployment" data-uid="{{deployment.uid}}">Remove Deployment</li>
+
+                            </ul>
+
+
+                        </div>
+                    </div> <!-- header-component --->
+                    <div class="box20">
+                        {% if deployment.containers|length > 0 %}
+                            {% for container in deployment.containers %}
+                                <div class="widget-container relative white shadow left code-base-type state-down widget-parent-event-container" data-slug="{{container.slug}}">
+                                    <div class="header-component box15 relative">
+                                        <div class="status-element absolute" data-element="container" data-uid="{{container.uid}}">
+                                            <div class="notif-message-status error"><span class="text-notif">State of element is Down</span> <span></span></div>
+                                        </div> 
+                                        <div class="align-center bold">{{container.name}}</div>
+                                        <div class="option-component absolute fade-hover"></div>
+                                        <div class="sub-menu-options absolute white shadow">
+                                            <ul>
+                                                <li class="action-icon edit animate btn-action" data-action="edit" data-element="container" data-uid="{{container.uid}}" data-parent="{{deployment.uid}}">Edit Container</li>
+                                                <li class="action-icon power animate btn-action" data-action="run-container" data-element="container" data-uid="{{container.uid}}" data-parent="{{deployment.uid}}"  data-extra='{ "name" : "{{container.image_name}}", "source" : "{{container.source}}" }'>Run Container</li>
+                                                <li class="action-icon restart animate btn-action" data-action="restart" data-element="container" data-uid="{{container.uid}}" data-parent="container" data-extra='{ "name" : "{{container.image_name}}", "source" : "{{container.source}}" }'>Restart Container</li>
+                                                <li class="action-icon push animate btn-action" data-action="push" data-element="container" data-uid="{{container.uid}}" data-parent="container">Push Image of Container</li>
+                                                <li class="action-icon template animate btn-action" data-action="save" data-element="template" data-uid="{{container.uid}}" data-parent="container">Save As Template</li>
+                                                <li class="action-icon remove animate btn-action" data-action="remove" data-element="container" data-uid="{{container.uid}}" data-parent="{{container.uid}}">Remove Container</li>
+                                            </ul>
+                                        </div>
+                                    </div> <!-- header-component --->
+                                </div>
+                            {% endfor %}
+
+                        {% else %}
+                            <div class="add-new-container fade-hover btn-action" data-action="add" data-element="container" data-parent="{{deployment.uid}}">
+                                <h3 class="align-center">Add New Container</h3>
+                            </div>
+                        {% endif %}
+
+                        {% for volume in deployment.volumes %}
+                            <div class="widget-volume relative white shadow left code-base-type widget-parent-event-volume" data-slug="{{volume.slug}}">
+                                <div class="header-component box15 relative">
+                                    <div class="status-element  absolute" data-element="volume" data-uid="{{volume.uid}}">
+                                        <div class="notif-message-status error"><span class="text-notif">State of element is Down</span> <span></span></div>
+                                    </div> 
+                                    <div class="align-center bold">{{volume.name}}</div>
+                                    <div class="option-component absolute fade-hover"></div>
+                                    <div class="sub-menu-options absolute white shadow">
+                                        <ul>
+                                            <li class="action-icon edit animate btn-action" data-action="edit" data-element="volume" data-uid="{{volume.uid}}" data-parent="{{deployment.uid}}">Edit Volume</li>
+                                            <li class="action-icon remove animate btn-action" data-action="remove" data-element="volume" data-uid="{{volume.uid}}" data-parent="{{deployment.uid}}">Remove Volume</li>
+                                        </ul>
+                                    </div>
+                                </div> <!-- header-component --->
+                            </div>
+                        {% endfor %}
+                        </div>
+                
+                </div> <!-- --->
+                
+                
+                
+            </div>
+        
+            <div class="clr"></div>
+        </div>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block right_main %}
+    
+{% for job in jobs %}
+
+    <div class="component-container relative white shadow job {{job.type}} widget-parent-event" data-slug="{{job.slug}}">
+        
+        <div class="menu-option-widget absolute shadow animate open">
+            <ul class="horizontal">
+                <li class="btn-action-env restart fade-hover pointer" data-action="restart-job" data-element="job" data-uid="{{job.uid}}" data-slug="{{job.slug}}">Restart</li>
+                <li class="btn-action-env delete fade-hover pointer" data-action="delete-job" data-element="job" data-uid="{{job.uid}}" data-slug="{{job.slug}}">Delete</li>
+                <li class="btn-action-env journal fade-hover pointer" data-action="journal-job" data-element="job" data-uid="{{job.uid}}" data-slug="{{job.slug}}">Journal</li>
+            </ul>
+            <div class="clr"></div>
+        </div>
+        
+        <div class="header-component box15 relative">
+            <div class="status-element  absolute" data-element="job" data-uid="{{job.uid}}">
+                <div class="notif-message-status error"><span class="text-notif">State of element is Down</span> <span></span></div>
+            </div> 
+            <div class="align-center bold">{{job.name}}</div>
+            <div class="option-component absolute fade-hover"></div>
+            <div class="sub-menu-options absolute white shadow">
+                <ul>
+                    <li class="action-icon edit animate btn-action" data-action="edit" data-element="job" data-uid="{{job.uid}}">Edit Job</li>
+                    <li class="action-icon remove animate btn-action" data-action="remove" data-element="job" data-uid="{{job.uid}}">Remove Job</li>
+                </ul>
+            </div>
+        </div> <!-- header-component --->
+        <div class="config-component relative box15">
+            <div class="item-config relative">
+                Type : <span class="bold">{{job.type|default:"-"}}</span> 
+            </div>
+
+            <div class="item-config relative">
+                restart_policy : <span class="bold">{{job.restart_policy|default:'-'}}</span> 
+            </div>
+            <div class="item-config relative">
+                Command : <span class="bold">{{job.command|default:'-'}}</span> 
+            </div>
+
+        </div><!-- config-component -->
+    </div>   <!-- component-container -->
+{% endfor %}
+{% endblock %}
+
+
+
+
+
+{% block extra_js %}
+<script>
+    Config.add("count_project", {{projects|length}});
+    Config.add("project", "{{current_project}}");
+    Config.add("env", "{{current_env}}");
+    Config.add("name_env", "{{environnement.name}}");
+    Config.add("name_project", "{{environnement.project.name}}");
+    Config.add("slug_env", "{{environnement.slug}}");
+    Config.add("slug_project", "{{environnement.project.slug}}");
+    
+    
+</script>
+
+<script src="{% static 'js/components/dist/workspace.js' %}"></script>
+
+{% endblock %}
+

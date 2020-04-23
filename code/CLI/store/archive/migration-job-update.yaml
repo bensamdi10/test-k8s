@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: migration-job-update
+spec:
+    template:
+        spec:
+            containers:
+              - name: plateforme
+                image: said10/plateforme
+                command: ['python manage.py migrate']
+                env:
+                  - name: DB_NAME_DB
+                    value: plateforme_db
+            restartPolicy: Never
+    backoffLimit: 5
+
+
+

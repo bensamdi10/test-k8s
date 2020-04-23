@@ -1,0 +1,47 @@
+{% extends 'base_account.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}
+
+مبروك ، تم إنشاء حسابك بنجاح
+
+
+{% endblock %}
+
+
+{% block header %}
+    {% include 'include/header_user.html' %}
+{% endblock %}
+{% block header_content %}{% endblock %}
+{% block body %}
+
+
+<div class="box-one-column center-auto top60">
+    <div id="container-confirmation" class="relative white border" data-type="v">
+        <div class="box30 align-center">
+           <div class="align-center top30"><img src="{% static 'images/success.png' %}" alt="Success" /></div>
+            <h1 class="light bottom30 top15 green-color">
+                
+                لقد تمت علمية إنشاء حسابكم
+                
+            </h1>
+            <div class="box-container center-auto">
+                <h2 class="sub-title">
+                     المرجو التحقق من عنوان بريدكم الإلكتروني لتفعيل حسابكم
+                    
+                </h2>
+                
+                <div class="top60 align-center bottom60">
+                    <a type="button" href="/account/login-profil/" class="btn border-bleu-violet next-slide" >
+                        
+                        تسجيل الدخول
+                        
+                        </a> 
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

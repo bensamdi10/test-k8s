@@ -1,0 +1,19 @@
+after_success:
+- echo "After Success"
+before_install:
+- apt-get update
+- pip install -r requirements.txt
+deploy:
+    'on':
+        branch: master
+    provider: script
+    script: bash ./deploy_travis.sh
+env:
+    global:
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    - SHA=git_hash
+    - PASSWORD_SERVICE=password
+script:
+- docker run -it -t said10/plateforme
+services: docker
+sudo: required

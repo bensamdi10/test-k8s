@@ -1,0 +1,20 @@
+{% load static i18n %}
+
+<header class="white box20">
+    <div class="left">
+        <a href="#"><img src="{% static 'images/logo.png' %}" /></a>
+    </div>
+    <div class="center-header left">
+        <select class="bold" id="select-project" data-value="{{current_project}}">
+            <option value="">Select Project</option>
+            {% for project in projects %}
+                <option value="{{project.uid}}">{{project.name}}</option>
+            {% endfor %}
+        </select>
+
+        <a href="#" class="add-project uppercase bold btn-action" data-action="add-project">Create new project</a>
+    </div>
+    <div class="clr"></div>
+
+
+</header><!-- header -->

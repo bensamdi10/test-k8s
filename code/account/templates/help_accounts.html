@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static i18n thumbnail  %}
+{% block title %}Strategy{% endblock %}
+{% block title_page %}Strategy{% endblock %}
+
+
+{% block header %}	    
+
+{% endblock %}
+{% block header_page %}	    
+    <div id="header-page" class="white shadow relative">
+        <div id="left-header" class="left ">
+           <div class="box15">
+               <img class="middle opacity-60" src="{% static 'images/dashboard.png' %}" /> &nbsp;
+               Help Accounts
+           </div>
+
+        </div>
+        <div id="right-header" class="right">
+        </div>
+        <div class="clr"></div>
+    </div>
+{% endblock %}
+
+
+
+
+{% block body %}
+<h1>Help Accounts</h1>
+{% endblock %}
+
+
+
+{% block extra_js %}
+<script>
+var uid_company = "{{uid}}"; 
+</script>
+<script src="{% static 'js/app/plugins/dom.ease.js' %}"></script>
+{% endblock %}

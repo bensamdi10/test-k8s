@@ -1,0 +1,8 @@
+kido.py
+setup.py
+KidoCLI.egg-info/PKG-INFO
+KidoCLI.egg-info/SOURCES.txt
+KidoCLI.egg-info/dependency_links.txt
+KidoCLI.egg-info/entry_points.txt
+KidoCLI.egg-info/requires.txt
+KidoCLI.egg-info/top_level.txt

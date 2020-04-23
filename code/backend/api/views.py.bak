@@ -1,0 +1,1674 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser, FileUploadParser, JSONParser
+
+from cms.template_api_view_custom import TemplateAPIViewCustom
+#from back_end.api.serializers import SectionSerializer, CategorySerializer, TagSerializer, TopicSerializer, AlertSerializer, SurveySerializer, WidgetSerializer, MediaDataSerializer, CarouselDataSerializer, AlertDataSerializer, SurveyDataSerializer, WidgetDataSerializer, ArticleSerializer, TopicDataSerializer
+from back_end.api.serializers import *
+from content.models import Section, Category, Topic, Tag, Article
+from alerts.models import Alert
+from poll.models import Survey, Question, StoreSurvey
+from widget.models import Widget
+from media_manager.models import File, Media, Image, Carousel
+from tags_location.models import Location
+from layout.models import Block, Theme
+import time
+from datetime import datetime
+from back_end.api.section_utils import SectionUtils
+from back_end.api.category_utils import CategoryUtils
+from back_end.api.topic_utils import TopicUtils
+from back_end.api.tags_utils import TagUtils
+from back_end.api.alert_utils import AlertUtils
+from back_end.api.poll_utils import SurveyUtils
+from back_end.api.widget_utils import WidgetUtils
+from back_end.api.media_manager_utils import MediaManagerUtils
+from back_end.api.carousel_utils import CarouselUtils
+from back_end.api.article_utils import ArticleUtils
+from back_end.api.location_utils import LocationUtils
+from back_end.api.theme_utils import ThemeUtils
+from back_end.api.serie_utils import SerieUtils
+import uuid
+from django.conf import settings
+import shutil
+import sys, zipfile, os, os.path, re
+from django.core.files.base import ContentFile
+import base64
+
+from django.template.loader import get_template
+
+from tracking.store_utils import StoreUtils
+
+from back_end.api.payment_utils import PaymentUtils
+
+from page.models import Template, Page
+from back_end.api.template_utils import TemplateUtils
+from back_end.api.page_utils import PageUtils
+from back_end.api.menu_utils import MenuUtils
+from back_end.api.link_utils import LinkUtils
+from back_end.api.block_utils import BlockUtils
+
+from credit.models import Payment
+from account.models import Profil
+from content.models import Author
+from content.keywords_engine import KeywordsEngine
+import requests
+
+
+class PinStory(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+    #parser_classes = (FormParser,)
+
+    def generateUID(self):
+        return str(uuid.uuid4())[:8]
+
+    def get(self, request, uid):
+
+        status_save = "success"
+        message = "ok"
+        story = Article.objects.all().filter(uid=uid)
+        if story.count() == 1:
+            story = story[0]
+            if story.pin == True:
+                story.pin = False
+                story.save()
+            else:
+                story.pin = True
+                story.save()
+        else:
+            status_save = "error"
+            message = "Story not exist"
+
+
+        return Response({ "status" : status_save, "message" : message}, content_type="application/json", status=200)
+
+
+class UploadFile(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+    #parser_classes = (FormParser,)
+
+    def generateUID(self):
+        return str(uuid.uuid4())[:8]
+
+    def post(self, request, type):
+
+        status_save = "success"
+        message = "File Save"
+        step = 0
+        type_media = ""
+        name_media = ""
+        if "type" in request.GET :
+            type_media = request.GET["type"]
+
+        if "name" in request.GET :
+            name_media = request.GET["name"]
+
+        if not type_media == "" and not name_media == "" :
+            uid = self.generateUID()
+
+            file = File()
+            file.name = name_media
+            file.type = type_media
+            file.uid = uid
+
+            format, imgstr = request.data["file_base64"].split(';base64,')
+            #ext = format.split('/')[-1]
+            ext = request.data["extension"]
+            data_file = ContentFile(base64.b64decode(imgstr))
+            file_name = str(uid) + "." + ext
+
+            if type_media == "image" :
+                #ext = name_media.split(".")[1]
+                #file_name = str(uid) + "." + ext
+                file.image.save(file_name, data_file, save=True)
+                file.save()
+
+
+            if type_media == "sound" :
+                file.sound.save(file_name, data_file, save=True)
+                file.save()
+                print file_name
+
+            if type_media == "video" :
+                file.video.save(file_name, data_file, save=True)
+                file.save()
+
+
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+class SaveImage(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+    #parser_classes = (FormParser,)
+
+    def generateUID(self):
+        return str(uuid.uuid4())[:8]
+
+    def post(self, request):
+
+        status_save = "success"
+        message = "Image Save"
+        step = 0
+        uid = self.generateUID()
+
+        data = request.data
+
+        image = Image()
+        image.name = data["name"]
+        image.uid = uid
+
+        format, imgstr = data["image_base64"].split(';base64,')
+        ext = data["extension"]
+        data_file = ContentFile(base64.b64decode(imgstr))
+        image_name = str(uid) + "." + ext
+        image.image.save(image_name, data_file, save=True)
+        image.save()
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step, "uid" : image.uid }, content_type="application/json", status=200)
+
+class SaveFile(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+    #parser_classes = (FormParser,)
+
+    def generateUID(self):
+        return str(uuid.uuid4())[:8]
+
+
+    def getProfil(self, request):
+        profil = Profil.objects.all().filter(user=request.user)
+        if profil.count() == 1:
+            profil = profil[0]
+            return profil
+        else:
+            return None
+
+    def getAuthor(self, request):
+        profil = self.getProfil(request)
+        if profil == None:
+            return None
+        else:
+            author = profil.author_set.all()
+            if author.count() == 1:
+                return author[0]
+            else:
+                return None
+
+    def post(self, request, type):
+
+        status_save = "success"
+        message = "Image Save"
+        step = 0
+        uid = self.generateUID()
+
+        data = request.data
+
+        author = self.getAuthor(request)
+        if not author == None:
+
+            media = Media()
+            media.author = author
+            media.title = data["title"]
+            media.title_fr = data["title"]
+            media.title_en = data["title"]
+            media.title_ar = data["title"]
+            media.legend = data["legend"]
+            media.uid = uid
+            media.type = type
+
+            if type == "sound" or type == "video":
+                media.iframe = "/media-manager/"+type+"/"+uid+"/"
+
+            file_base64 = data["file_base64"]
+            thumbnail_base64 = file_base64
+            if "thumbnail_base64" in data :
+                thumbnail_base64 = data["thumbnail_base64"]
+
+            if not file_base64 == "" and not file_base64 == "file":
+                format, imgstr = file_base64.split(';base64,')
+                ext = data["extension"]
+                data_file = ContentFile(base64.b64decode(imgstr))
+                file_name = str(media.uid) + "." + ext
+                media.file.save(file_name, data_file, save=True)
+
+            if type == "image" :
+                if not thumbnail_base64 == "" and not thumbnail_base64 == "file":
+                    format, imgstr = thumbnail_base64.split(';base64,')
+                    ext = data["extension"]
+                    data_file = ContentFile(base64.b64decode(imgstr))
+                    file_name = str(media.uid) + "." + ext
+                    media.thumbnail.save(file_name, data_file, save=True)
+
+            media.save()
+
+
+            return Response({ "status" : status_save, "message" : message, "step" : step, "file" : str(media.file.url), "title" : media.title, "legend" : media.legend }, content_type="application/json", status=200)
+        else:
+            return Response({"status": "error", "message": "Author not exist", "step": step}, content_type="application/json", status=200)
+
+
+class DeleteAttachementElement(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+    #parser_classes = (FormParser,)
+
+    def generateUID(self):
+        return str(uuid.uuid4())[:8]
+
+
+    def get(self, request, type, uid, parent, uid_parent):
+
+        status_save = "success"
+        message = "Image Save"
+        step = 0
+
+        if type == "image" and parent == "carousel" :
+            carousel = Carousel.objects.all().filter(uid=uid_parent)
+            image = Image.objects.all().filter(uid=uid)
+            if carousel.count() == 1 and image.count() == 1:
+                carousel = carousel[0]
+                image = image[0]
+                image.carousel.remove(carousel)
+                image.save()
+                carousel.save()
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+class SaveElement(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def saveArticle(self, request, data):
+        article_utils = ArticleUtils()
+        serializer = ArticleSerializer(data=data)
+        if serializer.is_valid():
+            return article_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating section", "step" : 0 }
+
+    def saveSection(self, request, data):
+        section_utils = SectionUtils()
+        serializer = SectionSerializer(data=data)
+        if serializer.is_valid():
+            return section_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating section", "step" : 0 }
+
+
+    def saveCategory(self, request, data):
+        category_utils = CategoryUtils()
+        serializer = CategorySerializer(data=data)
+        if serializer.is_valid():
+            return category_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating category", "step" : 0 }
+
+    def saveTopic(self, request, data):
+        topic_utils = TopicUtils()
+        serializer = TopicSerializer(data=data)
+        if serializer.is_valid():
+            return topic_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating category", "step" : 0 }
+
+    def saveTag(self, request, data):
+        tag_utils = TagUtils()
+        serializer = TagSerializer(data=data)
+        if serializer.is_valid():
+            return tag_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating category", "step" : 0 }
+
+    def saveAlert(self, request, data):
+        alert_utils = AlertUtils()
+        serializer = AlertSerializer(data=data)
+        if serializer.is_valid():
+            return alert_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveSurvey(self, type, request, data):
+        survey_utils = SurveyUtils()
+        serializer = SurveySerializer(data=data)
+        if serializer.is_valid():
+            if type == "survey" :
+                return survey_utils.save(request, data)
+            else:
+                return survey_utils.saveQuestion(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveWidget(self, request, data):
+        widget_utils = WidgetUtils()
+        serializer = WidgetSerializer(data=data)
+        if serializer.is_valid():
+            return widget_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveMedia(self, request, data):
+        media_utils = MediaManagerUtils()
+        serializer = WidgetSerializer(data=data)
+        if serializer.is_valid():
+            return media_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveCarousel(self, request, data):
+        carousel_utils = CarouselUtils()
+        serializer = CategorySerializer(data=data)
+        if serializer.is_valid():
+            return carousel_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveLocation(self, request, data):
+        location_utils = LocationUtils()
+        serializer = LocationSerializer(data=data)
+        if serializer.is_valid():
+            return location_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveTemplate(self, request, data):
+        template_utils = TemplateUtils()
+        serializer = TemplateSerializer(data=data)
+        if serializer.is_valid():
+            return template_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def savePage(self, request, data):
+        page_utils = PageUtils()
+        serializer = PageSerializer(data=data)
+        if serializer.is_valid():
+            return page_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveMenu(self, request, data):
+        menu_utils = MenuUtils()
+        serializer = MenuSerializer(data=data)
+        if serializer.is_valid():
+            return menu_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveLink(self, request, data):
+        link_utils = LinkUtils()
+        serializer = LinkSerializer(data=data)
+        if serializer.is_valid():
+            return link_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveBlock(self, request, data):
+        block_utils = BlockUtils()
+        serializer = BlockSerializer(data=data)
+        if serializer.is_valid():
+            return block_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveTheme(self, request, data):
+        theme_utils = ThemeUtils()
+        serializer = ThemeSerializer(data=data)
+        if serializer.is_valid():
+            return theme_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def savePayment(self, request, data):
+        payment_utils = PaymentUtils()
+        serializer = PaymentSerializer(data=data)
+        if serializer.is_valid():
+            return payment_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveSerie(self, request, data):
+        serie_utils = SerieUtils()
+        serializer = SerieSerializer(data=data)
+        if serializer.is_valid():
+            return serie_utils.save(request, data)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def post(self, request, type):
+
+        status_save = "success"
+        message = "Element has Created successfully"
+        step = 0
+        data = request.data
+
+        result = { "status" : status_save, "message" : message, "step" : 0 }
+
+        if type == "payment":
+            result = self.savePayment(request, data)
+
+        if type == "serie":
+            result = self.saveSerie(request, data)
+
+        if type == "article":
+            result = self.saveArticle(request, data)
+
+        if type == "section":
+            result = self.saveSection(request, data)
+
+        if type == "category":
+            result = self.saveCategory(request, data)
+
+        if type == "topic":
+            result = self.saveTopic(request, data)
+
+        if type == "tag":
+            result = self.saveTag(request, data)
+
+        if type == "alert":
+            result = self.saveAlert(request, data)
+
+        if type == "survey":
+            result = self.saveSurvey("survey", request, data)
+
+        if type == "question":
+            result = self.saveSurvey("question", request, data)
+
+        if type == "widget":
+            result = self.saveWidget(request, data)
+
+        if type == "media":
+            result = self.saveMedia(request, data)
+        if type == "carousel":
+            result = self.saveCarousel(request, data)
+
+        if type == "location":
+            result = self.saveLocation(request, data)
+
+        if type == "template":
+            result = self.saveTemplate(request, data)
+
+        if type == "page":
+            result = self.savePage(request, data)
+
+        if type == "menu":
+            result = self.saveMenu(request, data)
+
+        if type == "link":
+            result = self.saveLink(request, data)
+
+        if type == "block":
+            result = self.saveBlock(request, data)
+
+        if type == "theme":
+            result = self.saveTheme(request, data)
+
+        return Response(result, content_type="application/json", status=200)
+
+
+class UpdateElement(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+
+
+
+    def saveArticle(self, request, data, object):
+        article_utils = ArticleUtils()
+        serializer = ArticleSerializer(data=data)
+        if serializer.is_valid():
+            return article_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating section", "step" : 0 }
+
+    def saveSection(self, request, data, object):
+        section_utils = SectionUtils()
+        serializer = SectionSerializer(data=data)
+        if serializer.is_valid():
+            return section_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating section", "step" : 0 }
+
+
+    def saveCategory(self, request, data, object):
+        category_utils = CategoryUtils()
+        serializer = CategorySerializer(data=data)
+        if serializer.is_valid():
+            return category_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating category", "step" : 0 }
+
+    def saveTopic(self, request, data, object):
+        topic_utils = TopicUtils()
+        serializer = TopicSerializer(data=data)
+        if serializer.is_valid():
+            return topic_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating category", "step" : 0 }
+
+    def saveTag(self, request, data, object):
+        tag_utils = TagUtils()
+        serializer = TagSerializer(data=data)
+        if serializer.is_valid():
+            return tag_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating category", "step" : 0 }
+
+
+    def saveAlert(self, request, data, object):
+        alert_utils = AlertUtils()
+        serializer = AlertSerializer(data=data)
+        if serializer.is_valid():
+            return alert_utils.save(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveSurvey(self, type, request, data, object):
+        survey_utils = SurveyUtils()
+        serializer = SurveySerializer(data=data)
+        if serializer.is_valid():
+            if type == "survey" :
+                return survey_utils.update(request, data, object)
+            else:
+                return survey_utils.updateQuestion(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveWidget(self, request, data, object):
+        widget_utils = WidgetUtils()
+        serializer = WidgetSerializer(data=data)
+        if serializer.is_valid():
+            return widget_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveMedia(self, request, data, object):
+        media_utils = MediaManagerUtils()
+        serializer = WidgetSerializer(data=data)
+        if serializer.is_valid():
+            return media_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveCarousel(self, request, data, object):
+        carousel_utils = CarouselUtils()
+        serializer = CategorySerializer(data=data)
+        if serializer.is_valid():
+            return carousel_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveLocation(self, request, data, object):
+        location_utils = LocationUtils()
+        serializer = LocationSerializer(data=data)
+        if serializer.is_valid():
+            return location_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveTemplate(self, request, data, object):
+        template_utils = TemplateUtils()
+        serializer = TemplateSerializer(data=data)
+        if serializer.is_valid():
+            return template_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def savePage(self, request, data, object):
+        page_utils = PageUtils()
+        serializer = PageSerializer(data=data)
+        if serializer.is_valid():
+            return page_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveMenu(self, request, data, object):
+        menu_utils = MenuUtils()
+        serializer = MenuSerializer(data=data)
+        if serializer.is_valid():
+            return menu_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveLink(self, request, data, object):
+        link_utils = LinkUtils()
+        serializer = LinkSerializer(data=data)
+        if serializer.is_valid():
+            return link_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def saveBlock(self, request, data, object):
+        block_utils = BlockUtils()
+        serializer = BlockSerializer(data=data)
+        if serializer.is_valid():
+            return block_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveTheme(self, request, data, object):
+        theme_utils = ThemeUtils()
+        serializer = ThemeSerializer(data=data)
+        if serializer.is_valid():
+            return theme_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def savePayment(self, request, data, object):
+        payment_utils = PaymentUtils()
+        serializer = PaymentSerializer(data=data)
+        if serializer.is_valid():
+            return payment_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+
+    def saveSerie(self, request, data, object):
+        serie_utils = SerieUtils()
+        serializer = SerieSerializer(data=data)
+        if serializer.is_valid():
+            return serie_utils.update(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating Alert", "step" : 0 }
+
+    def post(self, request, type, uid):
+        status_save = "success"
+        message = "Element has Created successfully"
+        step = 0
+        data = request.data
+        result = {"status": status_save, "message": message, "step": 0}
+
+        if type == "payment":
+            composant = Payment.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.savePayment(request, data, composant)
+
+        if type == "serie":
+            composant = Serie.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveSerie(request, data, composant)
+
+
+        if type == "category":
+            composant = Category.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveCategory(request, data, composant)
+
+        if type == "topic":
+            composant = Topic.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveTopic(request, data, composant)
+
+        if type == "section" :
+            composant = Section.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveSection(request, data, composant)
+
+        if type == "tag" :
+            composant = Tag.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveTag(request, data, composant)
+
+        if type == "article" :
+            composant = Article.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveArticle(request, data, composant)
+
+
+        if type == "alert" :
+            composant = Alert.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveAlert(request, data, composant)
+
+        if type == "survey" :
+            composant = Survey.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveSurvey("survey", request, data, composant)
+
+        if type == "question" :
+            composant = Question.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveSurvey("question", request, data, composant)
+
+        if type == "widget" :
+            composant = Widget.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveWidget(request, data, composant)
+
+        if type == "media" :
+            composant = Media.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveMedia(request, data, composant)
+
+        if type == "carousel" :
+            composant = Carousel.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveCarousel(request, data, composant)
+
+        if type == "location" :
+            composant = Location.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveLocation(request, data, composant)
+
+        if type == "template" :
+            composant = Template.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveTemplate(request, data, composant)
+
+        if type == "page" :
+            composant = Page.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.savePage(request, data, composant)
+
+        if type == "menu" :
+            composant = Menu.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveMenu(request, data, composant)
+
+        if type == "link" :
+            composant = Link.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveLink(request, data, composant)
+
+        if type == "block" :
+            composant = Block.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveBlock(request, data, composant)
+
+
+        if type == "theme" :
+            composant = Theme.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveTheme(request, data, composant)
+
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+
+
+class TranslateElement(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def saveArticle(self, request, data, object):
+        article_utils = ArticleUtils()
+        serializer = ArticleSerializer(data=data)
+        if serializer.is_valid():
+            return article_utils.translate(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating section", "step" : 0 }
+
+    def savePage(self, request, data, object):
+        page_utils = PageUtils()
+        serializer = PageSerializer(data=data)
+        if serializer.is_valid():
+            return page_utils.translate(request, data, object)
+        else:
+            return { "status" : "error", "message" : "Error for creating section", "step" : 0 }
+
+    def post(self, request, type, uid):
+        status_save = "success"
+        message = "Element has Translated successfully"
+        step = 0
+        data = request.data
+        result = {"status": status_save, "message": message, "step": 0}
+        if type == "article" :
+            composant = Article.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.saveArticle(request, data, composant)
+
+        if type == "page" :
+            composant = Page.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+                result = self.savePage(request, data, composant)
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+class DeleteElement(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, type, uid):
+        status_save = "success"
+        message = "Element has Created successfully"
+        step = 0
+        composant = None
+        if type == "section":
+            composant = Section.objects.all().filter(uid=uid)
+        if type == "category":
+            composant = Category.objects.all().filter(uid=uid)
+        if type == "topic":
+            composant = Topic.objects.all().filter(uid=uid)
+        if type == "tag":
+            composant = Tag.objects.all().filter(uid=uid)
+        if type == "article":
+            composant = Article.objects.all().filter(uid=uid)
+        if type == "media":
+            composant = Media.objects.all().filter(uid=uid)
+
+        if type == "alert":
+            composant = Alert.objects.all().filter(uid=uid)
+
+        if type == "widget":
+            composant = Widget.objects.all().filter(uid=uid)
+        if type == "survey":
+            composant = Survey.objects.all().filter(uid=uid)
+        if type == "question":
+            composant = Question.objects.all().filter(uid=uid)
+
+        if type == "image":
+            composant = Image.objects.all().filter(uid=uid)
+
+        if type == "carousel":
+            composant = Carousel.objects.all().filter(uid=uid)
+
+        if type == "location":
+            composant = Location.objects.all().filter(uid=uid)
+
+        if type == "page":
+            composant = Page.objects.all().filter(uid=uid)
+
+        if type == "menu":
+            composant = Menu.objects.all().filter(uid=uid)
+
+        if type == "link":
+            composant = Link.objects.all().filter(uid=uid)
+
+        if type == "block":
+            composant = Block.objects.all().filter(uid=uid)
+
+        if type == "theme":
+            composant = Theme.objects.all().filter(uid=uid)
+
+        if not composant == None:
+            if composant.count() == 1:
+                composant = composant[0]
+                composant.delete()
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+
+class ArchiveElement(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, type, uid):
+        status_save = "success"
+        message = "Element has Created successfully"
+        step = 0
+        composant = None
+        if type == "section":
+            composant = Section.objects.all().filter(uid=uid)
+        if type == "category":
+            composant = Category.objects.all().filter(uid=uid)
+        if type == "topic":
+            composant = Topic.objects.all().filter(uid=uid)
+        if type == "tag":
+            composant = Tag.objects.all().filter(uid=uid)
+        if type == "article":
+            composant = Article.objects.all().filter(uid=uid)
+        if type == "survey":
+            composant = Survey.objects.all().filter(uid=uid)
+        if type == "question":
+            composant = Question.objects.all().filter(uid=uid)
+        if type == "widget":
+            composant = Widget.objects.all().filter(uid=uid)
+
+        if type == "alert":
+            composant = Alert.objects.all().filter(uid=uid)
+
+        if type == "media":
+            composant = Media.objects.all().filter(uid=uid)
+
+        if type == "carousel":
+            composant = Carousel.objects.all().filter(uid=uid)
+
+        if type == "image":
+            composant = Image.objects.all().filter(uid=uid)
+
+        if type == "location":
+            composant = Location.objects.all().filter(uid=uid)
+
+        if type == "page":
+            composant = Page.objects.all().filter(uid=uid)
+
+        if type == "menu":
+            composant = Menu.objects.all().filter(uid=uid)
+
+        if type == "link":
+            composant = Link.objects.all().filter(uid=uid)
+
+        if type == "block":
+            composant = Block.objects.all().filter(uid=uid)
+
+        if type == "theme":
+            composant = Theme.objects.all().filter(uid=uid)
+
+        if not composant == None:
+            if composant.count() == 1:
+                composant = composant[0]
+                composant.archive = True
+                composant.save()
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+
+
+class DeleteItems(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, type):
+        status_save = "success"
+        message = "Element has Created successfully"
+        step = 0
+
+        composants = None
+        if "items" in request.GET:
+            ids = request.GET.GET["items"]
+            ids = ids.split(",")
+            if type == "section":
+                composants = Section.objects.all().filter(uid__in=ids)
+            if type == "category":
+                composants = Category.objects.all().filter(uid__in=ids)
+            if type == "topic":
+                composants = Topic.objects.all().filter(uid__in=ids)
+            if type == "tag":
+                composants = Tag.objects.all().filter(uid__in=ids)
+            if type == "article":
+                composants = Article.objects.all().filter(uid__in=ids)
+            if type == "survey":
+                composants = Survey.objects.all().filter(uid__in=ids)
+            if type == "question":
+                composants = Question.objects.all().filter(uid__in=ids)
+            if type == "widget":
+                composants = Widget.objects.all().filter(uid__in=ids)
+
+            if type == "alert":
+                composants = Alert.objects.all().filter(uid__in=ids)
+
+            if type == "media":
+                composants = Media.objects.all().filter(uid__in=ids)
+            if type == "carousel":
+                composants = Carousel.objects.all().filter(uid__in=ids)
+            if type == "image":
+                composants = Image.objects.all().filter(uid__in=ids)
+
+            if type == "location":
+                composants = Location.objects.all().filter(uid__in=ids)
+
+            if type == "page":
+                composants = Page.objects.all().filter(uid__in=ids)
+
+            if type == "menu":
+                composants = Menu.objects.all().filter(uid__in=ids)
+
+            if type == "link":
+                composants = Link.objects.all().filter(uid__in=ids)
+
+            if type == "block":
+                composants = Block.objects.all().filter(uid__in=ids)
+
+            if type == "theme":
+                composants = Theme.objects.all().filter(uid__in=ids)
+
+            if not composants == None:
+                if composants.count() > 0:
+                    composants.delete()
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+
+class ArchiveItems(TemplateAPIViewCustom):
+
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, type):
+        status_save = "success"
+        message = "Element has Created successfully"
+        step = 0
+        omposants = None
+        if "items" in request.GET:
+            ids = request.GET["items"]
+            ids = ids.split(",")
+            if type == "section":
+                composants = Section.objects.all().filter(uid__in=ids)
+            if type == "category":
+                composants = Category.objects.all().filter(uid__in=ids)
+            if type == "topic":
+                composants = Topic.objects.all().filter(uid__in=ids)
+            if type == "tag":
+                composants = Tag.objects.all().filter(uid__in=ids)
+            if type == "article":
+                composants = Article.objects.all().filter(uid__in=ids)
+
+            if type == "survey":
+                composants = Survey.objects.all().filter(uid__in=ids)
+            if type == "question":
+                composants = Question.objects.all().filter(uid__in=ids)
+            if type == "widget":
+                composants = Widget.objects.all().filter(uid__in=ids)
+
+            if type == "alert":
+                composants = Alert.objects.all().filter(uid__in=ids)
+
+            if type == "media":
+                composants = Media.objects.all().filter(uid__in=ids)
+            if type == "carousel":
+                composants = Carousel.objects.all().filter(uid__in=ids)
+            if type == "image":
+                composants = Image.objects.all().filter(uid__in=ids)
+
+            if type == "location":
+                composants = Location.objects.all().filter(uid__in=ids)
+
+            if type == "page":
+                composants = Page.objects.all().filter(uid__in=ids)
+
+            if type == "menu":
+                composants = Menu.objects.all().filter(uid__in=ids)
+
+            if type == "link":
+                composants = Link.objects.all().filter(uid__in=ids)
+
+            if type == "block":
+                composants = Block.objects.all().filter(uid__in=ids)
+
+            if type == "theme":
+                composants = Theme.objects.all().filter(uid__in=ids)
+
+
+            if not composants == None:
+                if composants.count() > 0:
+                    for composant in composants:
+
+                        composant.archive = True
+                        composant.save()
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+class RestaureItems(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, type):
+        status_save = "success"
+        message = "Element has Created successfully"
+        step = 0
+        omposants = None
+        if "items" in request.GET:
+            ids = request.GET["items"]
+            ids = ids.split(",")
+            if type == "section":
+                composants = Section.objects.all().filter(uid__in=ids)
+            if type == "category":
+                composants = Category.objects.all().filter(uid__in=ids)
+            if type == "topic":
+                composants = Topic.objects.all().filter(uid__in=ids)
+            if type == "tag":
+                composants = Tag.objects.all().filter(uid__in=ids)
+            if type == "article":
+                composants = Article.objects.all().filter(uid__in=ids)
+
+            if type == "survey":
+                composants = Survey.objects.all().filter(uid__in=ids)
+            if type == "question":
+                composants = Question.objects.all().filter(uid__in=ids)
+            if type == "widget":
+                composants = Widget.objects.all().filter(uid__in=ids)
+
+            if type == "alert":
+                composants = Alert.objects.all().filter(uid__in=ids)
+
+            if type == "media":
+                composants = Media.objects.all().filter(uid__in=ids)
+            if type == "carousel":
+                composants = Carousel.objects.all().filter(uid__in=ids)
+            if type == "image":
+                composants = Image.objects.all().filter(uid__in=ids)
+
+            if type == "location":
+                composants = Location.objects.all().filter(uid__in=ids)
+
+            if type == "page":
+                composants = Page.objects.all().filter(uid__in=ids)
+
+            if type == "menu":
+                composants = Menu.objects.all().filter(uid__in=ids)
+
+            if type == "link":
+                composants = Link.objects.all().filter(uid__in=ids)
+
+            if type == "block":
+                composants = Block.objects.all().filter(uid__in=ids)
+
+            if type == "theme":
+                composants = Theme.objects.all().filter(uid__in=ids)
+
+            if not composants == None:
+                if composants.count() > 0:
+                    for composant in composants:
+                        composant.archive = False
+                        composant.save()
+
+
+        return Response({ "status" : status_save, "message" : message, "step" : step }, content_type="application/json", status=200)
+
+
+class GetMedias(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def getProfil(self, request):
+        profil = Profil.objects.all().filter(user=request.user)
+        if profil.count() == 1:
+            profil = profil[0]
+            return profil
+        else:
+            return None
+
+    def getAuthor(self, request):
+        profil = self.getProfil(request)
+        if profil == None:
+            return None
+        else:
+            author = profil.author_set.all()
+            if author.count() == 1:
+                return author[0]
+            else:
+                return None
+
+    def get(self, request, type):
+        status_save = "success"
+        message = "Element has Created successfully"
+        count = 0
+        limit = 12
+        author = self.getAuthor(request)
+        if author == None:
+            medias = Media.objects.all().filter(type="-").order_by("-id")
+        else:
+            medias = Media.objects.all().filter(type=type, author=author).order_by("-id")
+
+        count = medias.count()
+
+        if "q" in request.GET:
+            query = request.GET["q"]
+            medias = medias.filter(title__icontains=query).order_by("-id")
+
+        if "page" in request.GET:
+            page = request.GET["page"]
+            page = int(page) * limit
+            start = page - limit
+
+            medias = medias[start:page]
+
+        serializer = MediaDataSerializer(medias, many=True)
+
+
+
+        return Response({ "status" : status_save, "message" : message, "data" : serializer.data, "count" : count }, content_type="application/json", status=200)
+
+
+class RenderWidget(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+
+    def getHTML(self, composant, type, lang):
+        html = ""
+        if type == "carousel" :
+            template = get_template('widgets/carousel_widget.html')
+            images = composant.image_set.all()
+            composant.images = images
+            html = template.render({'composant': composant})
+
+        if type == "survey" :
+            template = get_template('widgets/survey_widget.html')
+            questions = composant.question_set.all()
+            composant.questions = questions
+            html = template.render({'composant': composant})
+
+        if type == "alert" :
+            template = get_template('widgets/alert_widget.html')
+            html = template.render({'composant': composant})
+        if type == "content" :
+            template = get_template('widgets/content_widget.html')
+            html = template.render({'composant': composant})
+
+        return html
+
+
+    def get(self, request, type, id, lang):
+        status_save = "success"
+        message = "Element has Created successfully"
+        composant = None
+        html_widget = ""
+        if type == "carousel":
+            composant = Carousel.objects.all().filter(id=id)
+        if type == "survey":
+            composant = Survey.objects.all().filter(id=id)
+        if type == "alert":
+            composant = Alert.objects.all().filter(id=id)
+        if type == "content":
+            composant = Widget.objects.all().filter(id=id)
+
+        if not composant == None:
+            if composant.count() == 1 :
+                composant = composant[0]
+                if lang == "fr" :
+                    composant.title = composant.title_fr
+                if lang == "ar" :
+                    composant.title = composant.title_ar
+                if lang == "en" :
+                    composant.title = composant.title_en
+                html_widget = self.getHTML(composant, type, lang)
+
+
+        return Response({ "status" : status_save, "message" : message, "data" : html_widget, "lang" :  lang }, content_type="application/json", status=200)
+
+
+class GetWidgets(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, type):
+        status_save = "success"
+        message = "Element has Created successfully"
+        count = 0
+        limit = 12
+
+        if type == "carousel" :
+            widgets = Carousel.objects.all().order_by("-id")
+        if type == "survey" :
+            widgets = Survey.objects.all().order_by("-id")
+        if type == "alert" :
+            widgets = Alert.objects.all().order_by("-id")
+        if type == "content" :
+            widgets = Widget.objects.all().order_by("-id")
+
+
+        count = widgets.count()
+
+        if "q" in request.GET:
+            query = request.GET["q"]
+            widgets = widgets.filter(title__icontains=query).order_by("-id")
+
+        if "page" in request.GET:
+            page = request.GET["page"]
+            page = int(page) * limit
+            start = page - limit
+
+            widgets = widgets[start:page]
+
+        if type == "carousel" :
+            serializer = CarouselDataSerializer(widgets, many=True)
+
+        if type == "alert" :
+            serializer = AlertDataSerializer(widgets, many=True)
+
+        if type == "survey" :
+            serializer = SurveyDataSerializer(widgets, many=True)
+
+        if type == "content" :
+            serializer = WidgetDataSerializer(widgets, many=True)
+            for widget in serializer.data:
+                widget["name"] = widget["title"]
+
+
+
+        return Response({ "status" : status_save, "message" : message, "data" : serializer.data, "count" : count }, content_type="application/json", status=200)
+
+class GetTopics(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request,):
+        status_save = "success"
+        message = "Element has Created successfully"
+        count = 0
+        limit = 12
+
+        topics =  Topic.objects.all().order_by("-id");
+
+
+
+
+        if "q" in request.GET:
+            query = request.GET["q"]
+            topics = topics.filter(name__icontains=query).order_by("-id")
+
+        count = topics.count()
+        serializer = TopicDataSerializer(topics, many=True)
+
+
+
+        return Response({ "status" : status_save, "message" : message, "data" : serializer.data, "count" : count }, content_type="application/json", status=200)
+
+class GetTags(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request,):
+        status_save = "success"
+        message = "Element has Created successfully"
+        count = 0
+        limit = 12
+
+        tags =  Tag.objects.all().order_by("-id");
+
+
+        count = tags.count()
+
+        if "q" in request.GET:
+            query = request.GET["q"]
+            tags = tags.filter(name__contains=query).order_by("-id")
+
+
+        serializer = TagDataSerializer(tags, many=True)
+
+
+
+        return Response({ "status" : status_save, "message" : message, "data" : serializer.data, "count" : count }, content_type="application/json", status=200)
+
+class GetElement(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, type, uid):
+        status_save = "success"
+        message = "Element has Created successfully"
+        count = 0
+        limit = 12
+        element = None
+        if type == "payment" :
+            element = Payment.objects.all().filter(uid=uid)
+
+        if not element == None:
+            serializer = PaymentDataSerializer(element, many=True)
+
+
+
+        return Response({ "status" : status_save, "message" : message, "data" : serializer.data }, content_type="application/json", status=200)
+
+
+class ValidSurvey(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, uid):
+        status_save = "success"
+        message = "Element has Created successfully"
+        count = 0
+        limit = 12
+
+        question = Question.objects.all().filter(uid=uid)
+        if question.count() == 0 :
+            status_save = "error"
+            message = "Question Not Exist"
+        else:
+            question = question[0]
+            survey = question.survey.all()[0]
+            store_utils = StoreUtils()
+            store_utils.saveStoreSurvey(request, question, survey)
+            message = survey.message
+
+
+
+
+
+
+
+        return Response({ "status" : status_save, "message" : message }, content_type="application/json", status=200)
+
+
+class ChangeState(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, type, uid, attr):
+        status_save = "success"
+        message = False
+        composant = None
+        if type == "location" :
+            composant = Location.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+            else:
+                composant = None
+
+        if type == "theme" :
+            composant = Theme.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+            else:
+                composant = None
+
+        if type == "topic" :
+            composant = Topic.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+            else:
+                composant = None
+
+        if type == "tag" :
+            composant = Tag.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+            else:
+                composant = None
+
+        if type == "link" :
+            composant = Link.objects.all().filter(uid=uid)
+            if composant.count() == 1:
+                composant = composant[0]
+            else:
+                composant = None
+
+        value_result = False
+        if not composant == None :
+
+            if attr == "active" :
+                value_attr = composant.active
+                if value_attr == True:
+                    composant.active = False
+                else:
+                    composant.active = True
+
+                value_result = composant.active
+
+                if value_result == True and type == "theme":
+                    temp_themes = Theme.objects.all().filter(active=True, targeting=False)
+
+                    if composant.targeting == True:
+                        temp_themes = Theme.objects.all().filter(active=True, targeting=True)
+                        for temp_ in temp_themes:
+                            if temp_themes.count() > 0:
+                                if temp_.type_element == composant.type_element and temp_.uid_element == composant.uid_element:
+                                    temp_.active = False
+                                    temp_.save()
+
+
+                    if temp_themes.count() > 0 and composant.targeting == False:
+                        for temp_ in temp_themes:
+                            if not temp_.id == composant.id:
+                                temp_.active = False
+                                temp_.save()
+
+
+                composant.save()
+
+            if attr == "publish" :
+                value_attr = composant.publish
+                if value_attr == True:
+                    composant.publish = False
+                else:
+                    composant.publish = True
+
+                value_result = composant.publish
+                composant.save()
+
+            if attr == "hashtag" :
+                value_attr = composant.hashtag
+                if value_attr == True:
+                    composant.hashtag = False
+                else:
+                    composant.hashtag = True
+
+                value_result = composant.hashtag
+                composant.save()
+
+            if attr == "all_access" :
+                value_attr = composant.all_access
+                if value_attr == True:
+                    composant.all_access = False
+                else:
+                    composant.all_access = True
+
+                value_result = composant.all_access
+                composant.save()
+
+            if attr == "home_access" :
+                value_attr = composant.home_access
+                if value_attr == True:
+                    composant.home_access = False
+                else:
+                    composant.home_access = True
+
+                value_result = composant.home_access
+                composant.save()
+        else:
+            status_save = "error"
+
+
+        return Response({ "status" : status_save, "message" : message, "data" : value_result }, content_type="application/json", status=200)
+
+
+
+class Findkeyword(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request, keyword):
+        status_save = "success"
+        value_result = None
+
+        keywords_engine = KeywordsEngine()
+        value_result = keywords_engine.parseKeyword(keyword)
+
+
+
+
+        return Response({ "status" : status_save, "data" : value_result }, content_type="application/json", status=200)
+
+
+
+class GetImagesWeb(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request):
+
+        query = ""
+        page = 1
+        data = []
+        if "q" in request.GET :
+            query = request.GET["q"]
+            if "page" in request.GET:
+                page = int(request.GET["page"]) + 1
+                page = str(page)
+            r = requests.get('https://pixabay.com/api/?key=14089499-f90e42772d6081c4b5b58c2d4&q='+query+'&per_page=12&min_width=200&min_height=200&lang=en&page='+str(page))
+            json_data = r.json()
+            data = json_data["hits"]
+        return Response({ "status" : "success", "data" : data, "count" : json_data["total"] }, content_type="application/json", status=200)
+
+# AIzaSyAxlQKrLvWjYhyPWY4sJNCtpChmZnFW1Ok   key Google
+class GetVideosWeb(TemplateAPIViewCustom):
+    permission_classes = (AllowAny,)
+    renderer_classes = (JSONRenderer,)
+    limit_per_page = 10
+
+    def get(self, request):
+
+        query = ""
+        page = 1
+        data = []
+        if "q" in request.GET :
+            query = request.GET["q"]
+            if "page" in request.GET:
+                page = int(request.GET["page"]) + 1
+                page = str(page)
+            r = requests.get('https://pixabay.com/api/videos/?key=14089499-f90e42772d6081c4b5b58c2d4&q='+query+'&per_page=12&lang=en&page='+str(page))
+            json_data = r.json()
+            data = json_data["hits"]
+        return Response({ "status" : "success", "data" : data, "count" : json_data["total"] }, content_type="application/json", status=200)
+

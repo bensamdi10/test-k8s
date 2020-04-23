@@ -1,0 +1,127 @@
+{% load static i18n %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <title>K8s project</title>
+    <link rel="stylesheet" href="{% static 'css/xterm.css' %}" media="all" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" media="all" />
+</head>
+<body class="gris-bg">
+    
+    
+    
+    <div id="prepend-body"></div>
+    
+    {% include "include/header.html" %}
+    {% include "include/tool_bar.html" %}
+    
+    
+    
+    <div id="main">
+        <div class="side-column left" id="side-bar">
+            {% if envs|length > 0 %}
+                <div class="box20">
+                    <h2 class="bold bottom20">Infos of Environnement</h2>
+                    {% block side_column %}{% endblock %}
+
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="main-column right" id="main-column">
+            
+            {% if envs|length > 0 %}
+            
+                <div class="box30">
+                    <div class="container-workspace center-auto relative">
+                        <div id="main-tool" class="relative">
+                            <div class="left column-2" id="">
+                                <a id="link-service" href="#" class="btn-icon white hover shadow service btn-action" data-action="add" data-element="service">Link Service</a>
+                                <a id="env-variable" href="#" class="btn-icon white hover shadow env btn-action" data-action="add" data-element="variable">Add ENV Variables</a>
+                                <a id="env-variable" href="#" class="btn-icon white hover shadow env btn-action" data-action="add" data-element="job">Add Jobs & Crons</a>
+                                <a id="run-env" href="#" class="btn-icon white shadow hover run btn-action" data-action="run-env" data-element="env" data-uid='{{env}}'>Run ENV</a>
+
+                            </div>    
+                            <div class="right column-1 align-right" id="">
+                                <a id="open-terminal" href="#" class="btn-icon white shadow hover terminal btn-action" data-action="open-terminal" data-element="env" data-uid='{{env}}'>Open Terminal</a>
+                                
+                                <div class="item-config relative inline-block">
+                                    Edition Auto &nbsp;
+
+                                    <div id="switcher-edition" class="switcher right active" data-value="edition_mode" data-yes="Yes" data-no="No">
+                                           <div class="handler animate"></div>
+                                           <div class="text-handler animate">Yes</div>
+                                           <input type="hidden" name="edition_mode" value="true">
+                                    </div>
+
+                                    <div class="clr"></div>
+
+                                </div>
+                                
+                                
+                                <a id="create-container" href="#" class="btn-icon bleu-violet bleu-violet-shadow hover container-icon uppercase btn-action"  data-action="add" data-element="deployment">Create New Deployment</a>
+                            </div>     
+                            <div class="clr"></div>
+
+                        </div><!-- main-tool -->
+
+
+                        <div id="" class="workspace-preview relative center-auto top30 bottom30 shadow">
+                            <div class="left" id="left-workspace">
+                                <div class="title-section align-center box10">Services</div>
+                                <div class="box20">
+                                    {% block left_main %}{% endblock %}  
+                                </div>
+                                
+                            </div>
+                            <div class="left" id="center-workspace">
+                                <div class="title-section align-center box10">Infrastructure</div>
+                                <div class="box20">
+                                    {% block center_main %}{% endblock %}
+                                </div>
+                            </div>
+                            <div class="right" id="right-workspace">
+                                <div class="title-section align-center box10">Jobs & Crons</div>
+                                <div class="box20">
+                                    {% block right_main %}{% endblock %}  
+                                </div>
+                                
+                            </div>
+                            
+                            <div class="clr"></div>
+                            
+                        </div>
+                        
+                        
+                        
+
+
+                    </div>
+                </div>
+            {% endif %}
+            
+            
+
+        </div>
+        <div class="clr"></div>
+    </div>
+    
+    <div id="container-terminal" class="border">
+        <div id="header-terminal" class="">Terminal   <span class="close-terminal btn-action right pointer fade-hover" data-action="close-terminal"></span>
+            <div class="clr"></div>
+        </div>
+        <div id="terminal" class="edition-manuel"></div>
+    </div>
+    
+    
+    <script src="{% static 'js/libs/xterm.js' %}"></script>
+    <script src="{% static 'js/components/config.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+    
+</body>
+</html>

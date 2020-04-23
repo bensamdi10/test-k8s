@@ -1,0 +1,259 @@
+{% extends 'base_account.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}
+
+{% if LANGUAGE_CODE == "fr" %}
+Créer un Compte utilisateur
+{% else %}
+   {% trans "Create a user account" %}
+{% endif %}
+
+
+{% endblock %}
+
+{% block header %}
+    {% include "include/header_backend_empty.html" %}
+{% endblock %}
+
+{% block body %}
+<div class="top40 center-auto">
+    <div id="container-form" class="relative white border center-auto " data-type="h">
+       <div id="left-form" class="full-width">
+           <div id="form-page">
+                
+                <form id="form-company" class="form-slider" action="/account/create-profil-user/" method="post">
+                  {% csrf_token %}
+                   <div class="slider-form-container relative">
+                        <div class="slide-form">
+                            <div class="">
+                            
+                            <div class="inputs box30 white">
+                                
+                                <h1 class="light bottom30">
+                                    {% if LANGUAGE_CODE == "fr" %}
+                                    Créer un Compte utilisateur
+                                    {% else %}
+                                       {% trans "Create a user account" %}
+                                    {% endif %}
+
+                                </h1>
+                                
+                                <p class="{% if form.errors.first_name %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        {% if LANGUAGE_CODE == "fr" %}
+                                          Nom
+                                        {% else %}
+                                           {% trans "First name" %}
+                                        {% endif %}
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="first_name" class="required {% if form.errors.first_name %}error{% endif %}" value="{{form.first_name.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.first_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.first_name|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.last_name %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        {% if LANGUAGE_CODE == "fr" %}
+                                          Prénom
+                                        {% else %}
+                                           {% trans "Last name" %}
+                                        {% endif %}
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="last_name" class="required {% if form.errors.last_name %}error{% endif %}" value="{{form.last_name.value|default_if_none:''}}" data-rule="string"placeholder="Example : John" />
+                                    {% if form.errors.last_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.last_name|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.email %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        {% if LANGUAGE_CODE == "fr" %}
+                                          Adresse Email
+                                        {% else %}
+                                           {% trans "Email address" %}
+                                        {% endif %}
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="email" class="required ltr {% if form.errors.email %}error{% endif %}" 
+                                    value="{% if form.email.value %}{{form.email.value}}{% else %}{{email}}{% endif %}" data-rule="email" placeholder="Example: example@example.com" />
+                                    {% if form.errors.email %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.email|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="font12 top30"> <span class="asterix">*</span><span class="fade"> : 
+                                 
+                                 {% if LANGUAGE_CODE == "fr" %}
+                                  Champs obligatoires
+                                {% else %}
+                                   {% trans "Mandatory fields" %}
+                                {% endif %}
+                                 
+                                 
+                                 </span></p>
+                                
+                            </div>
+                            
+                            </div>    
+                            
+                            <div class="align-center bottom40">
+                                
+                                <input type="button" value='{% if LANGUAGE_CODE == "fr" %}Suivant{% else %}Next{% endif %}' class="border-bleu-violet next-slide" data-index="1" />
+                            </div>
+                           
+                        </div><!-- slide-form -->
+                        
+                        <div class="slide-form">
+                            <div class="">
+                            
+                            <div class="inputs box30 white">
+                                
+                                <h1 class="light bottom30">
+                                    {% if LANGUAGE_CODE == "fr" %}
+                                    informations supplémentaires
+                                    {% else %}
+                                       Additional Information
+                                    {% endif %}
+
+                                </h1>
+                                
+                                <p class="{% if form.errors.gender %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        {% if LANGUAGE_CODE == "fr" %}
+                                         Genre
+                                        {% else %}
+                                           {% trans "Gender" %}
+                                        {% endif %} 
+                                    <span class="asterix">*</span></label>
+                                    <select name="gender" data-rule="string" value="{{form.name.gender|default_if_none:""}}" class="required {% if form.errors.gender %}error{% endif %}">
+                                        <option value="">
+                                            
+                                            {% if LANGUAGE_CODE == "fr" %}
+                                             Séléctionner Genre
+                                            {% else %}
+                                               {% trans "Select Gender" %}
+                                            {% endif %}
+                                            
+                                        </option>
+                                        <option value="man">
+                                            
+                                            {% if LANGUAGE_CODE == "fr" %}
+                                             Homme
+                                            {% else %}
+                                               {% trans "Man" %}
+                                            {% endif %}
+                                        
+                                        </option>
+                                        <option value="woman">
+                                        
+                                            {% if LANGUAGE_CODE == "fr" %}
+                                              Femme
+                                            {% else %}
+                                              {% trans "Woman" %}
+                                            {% endif %}
+                                        
+                                        </option>
+                                        <option value="other">
+                                        
+                                            {% if LANGUAGE_CODE == "fr" %}
+                                              Autres
+                                            {% else %}
+                                              {% trans "Other" %}
+                                            {% endif %}
+                                        
+                                        </option>
+                                    </select>
+                                    {% if form.errors.gender %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.gender|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+
+                                <p class="{% if form.errors.password %}error-p{% endif %}">
+                                    <label>
+                                        
+                                            {% if LANGUAGE_CODE == "fr" %}
+                                              Password
+                                            {% else %}
+                                              {% trans "Password" %}
+                                            {% endif %}
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="password" data-rule="password" name="password" placeholder='{% if LANGUAGE_CODE == "fr" %}Mot de passe doit contenir au moins 8 caractères{% else %}Password must contain at least 8 characters{% endif %}'  class="required ltr {% if form.errors.password %}error{% endif %}" />
+                                    {% if form.errors.password %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.password|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.confirm_password %}error-p{% endif %}">
+                                    <label>
+                                        
+                                            {% if LANGUAGE_CODE == "fr" %}
+                                             Confirmer le mot de passe
+                                            {% else %}
+                                              {% trans "Confirm password" %}
+                                            {% endif %}
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="password" data-rule="password" name="confirm_password" placeholder='{% if LANGUAGE_CODE == "fr" %}Mot de passe doit contenir au moins 8 caractères{% else %}Password must contain at least 8 characters{% endif %}'  class="required ltr {% if form.errors.confirm_password %}error{% endif %}" />
+                                    {% if form.errors.confirm_password %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.confirm_password|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="font12 top30"> <span class="asterix">*</span><span class="fade"> : 
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Champs obligatoires
+                                {% else %}
+                                   {% trans "Mandatory fields" %}
+                                {% endif %}
+                                
+                                </span></p>
+                                
+                            </div>
+                            
+                            </div>
+                            <div class="top30 align-center bottom30">
+                                <input type="button" value='{% if LANGUAGE_CODE == "fr" %}Revenir{% else %}Back{% endif %}' class="gris-btn border-gris back-slide" />
+                               <input type="button" value='{% if LANGUAGE_CODE == "fr" %}Valider{% else %}Validate{% endif %}' class="border-green finish-slide" data-index="2" />
+                            </div>
+                            
+                        </div><!-- slide-form -->
+                        
+                        <div class="clr"></div>
+
+
+                    </div><!-- slider-form-container -->
+               </form>
+           </div><!-- box30 -->
+        </div><!-- left-form -->
+
+       
+        <div class="clr"></div>
+    </div><!-- container-form -->
+    <div id="container-pagination" class="top30 align-center"></div>
+</div> 
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+{% endblock %}
+
+
+{% block extra_js %}
+        <script>
+        </script>
+{% endblock %}

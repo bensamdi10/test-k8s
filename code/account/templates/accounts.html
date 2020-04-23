@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+           
+{% block title %}
+
+{% if LANGUAGE_CODE == "fr" %}
+  Membres
+{% else %}
+   {% trans "Members" %}
+{% endif %}
+
+{% endblock %}
+
+
+{% block header_page %}	    
+    <div id="header-page" class="white shadow relative">
+        <div id="left-header" class="left">
+           <div class="box15">
+               <img class="middle opacity-60" src="{% static 'images/account.png' %}" /> &nbsp;
+               {% if LANGUAGE_CODE == "fr" %}
+                  Membres
+                {% else %}
+                   {% trans "Members" %}
+                {% endif %}
+           </div>
+
+        </div>
+        <div id="right-header" class="right">
+
+        </div>
+        <div class="clr"></div>
+    </div>
+{% endblock %}
+
+{% block side %}
+<div class="" id="box-side-search">
+    <div class="box20">
+        <h2 class="sub-title">
+
+            {% if LANGUAGE_CODE == "fr" %}
+              Ajouter des Membres
+            {% else %}
+               {% trans "Add new members" %}
+            {% endif %}
+
+        </h2>
+    
+    </div>
+    
+    
+    <div class="link-component">
+    <a href="/accounts/sent-invitation/{{uid}}/">
+        {% if LANGUAGE_CODE == "fr" %}
+          Inviter un Membre
+        {% else %}
+           Invite a Member
+        {% endif %}
+    </a>
+   </div>
+    
+   <div class="link-component">
+    <a href="/client/create-client/{{uid}}/">
+        {% if LANGUAGE_CODE == "fr" %}
+          Ajouter un Client
+        {% else %}
+           Add new Client
+        {% endif %}
+    </a>
+   </div>
+    
+    <div class="link-component">
+    <a href="/publisher/create-publisher/{{uid}}/">
+        {% if LANGUAGE_CODE == "fr" %}
+          Ajouter un Annonceur
+        {% else %}
+           Add new Publisher
+        {% endif %}
+    </a>
+   </div>
+    
+    
+    
+    
+    
+</div>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div id="side-types" class="relative left content-side">
+    <div class="container-items absolute">
+        
+        <a class="item-report animate block  bleu-color {% if type == 'profils' %}active{% endif %}" href="/accounts/accounts/{{uid}}/profils/">
+            <div class="icon-item-report profils-side"></div>
+            <div class="name-item-report">
+                {% if LANGUAGE_CODE == "fr" %}
+                  Profiles de l'organisation
+                {% else %}
+                   Profiles of the organization
+                {% endif %}
+            </div>
+        </a>
+        
+        
+        <a class="item-report animate block  bleu-color {% if type == 'clients' %}active{% endif %}" href="/accounts/accounts/{{uid}}/clients/">
+            <div class="icon-item-report clients-side"></div>
+            <div class="name-item-report">
+                {% if LANGUAGE_CODE == "fr" %}
+                  Profiles Clients
+                {% else %}
+                   Clients Profiles 
+                {% endif %}
+            
+            </div>
+        </a>
+        {% comment %}
+        <a class="item-report animate block bleu-color {% if type == 'publishers' %}active{% endif %}" href="/accounts/accounts/{{uid}}/publishers/">
+            <div class="icon-item-report publishers-side"></div>
+            <div class="name-item-report">
+                {% if LANGUAGE_CODE == "fr" %}
+                  Profiles Annonceurs
+                {% else %}
+                   Clients Publishers 
+                {% endif %}
+            </div>
+        </a>
+        {% endcomment %}
+    
+    </div>
+
+</div>
+
+
+<div id="content-body" class="relative right content-body">
+    
+    {% if type == "profils" %}
+            
+    <div class="relative" id="">
+        <div class="white relative">
+           <div class="result-search absolute none white"></div>
+            <div class="table-normal">
+                <table class="sorted" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <thead>
+                       <tr>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Nom Complet
+                                {% else %}
+                                   {% trans "Full name" %}
+                                {% endif %}
+
+                                </th>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Adresse Email
+                                {% else %}
+                                   {% trans "Email address" %}
+                                {% endif %}
+
+                            </th>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Téléphone
+                                {% else %}
+                                   {% trans "Phone number" %}
+                                {% endif %}
+
+                                </th>
+                            <th>
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Statuts du Compte
+                                {% else %}
+                                   {% trans "Status of account" %}
+                                {% endif %}
+
+                             </th>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Rôle du Membre
+                                {% else %}
+                                   {% trans "Role of member" %}
+                                {% endif %}
+
+                                </th>
+                       </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        {% for profil in profiles %}
+                            {% if not profil.type == "client" and not profil.type == "publisher" %}
+                            <tr class="{% cycle '' 'zebra' %}">
+                                <td>{{profil.first_name|title}} {{profil.last_name|title}}</td>
+                                <td>{{profil.email|default:'-'}}</td>
+                                <td class="{% if not profil.phone %}align-center{%endif%}">{{profil.phone|default:'-'}}</td>
+                                <td class="">
+
+                                    <div class="switcher {% if not profil.type == 'administrator' %}state-component{% endif %} {% if profil.active == True %}active{% endif %}" id="" data-id="{{profil.id}}" data-type="profil" data-attr="active">
+                                       <div class="handler animate"></div>
+                                    </div>
+                                </td>
+                                <td class="{% if not profil.role %}align-center{%endif%}"><span class="bloc-status {{profil.role}}">{{profil.role|default:'-'|title}}</span></td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        <tr class="tr-empty none">
+                            <td colspan="7" class="align-center">
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Aucun Résultats
+                                {% else %}
+                                   {% trans "No result" %}
+                                {% endif %}
+
+                                </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="footer-table relative"></div>
+        </div>
+    </div>
+    
+    {% endif %}
+    
+    {% if type == "clients" %}
+    <div class="relative" id="">
+        <div class="white relative">
+           <div class="result-search absolute none white"></div>
+            <div class="table-normal">
+                <table class="sorted" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <thead>
+                       <tr>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Nom
+                                {% else %}
+                                   {% trans "Name" %}
+                                {% endif %}
+
+                                </th>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Adresse Email
+                                {% else %}
+                                   {% trans "Email address" %}
+                                {% endif %}
+
+                            </th>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Téléphone
+                                {% else %}
+                                   {% trans "Phone number" %}
+                                {% endif %}
+
+                                </th>
+                            <th>
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Statuts du Compte
+                                {% else %}
+                                   {% trans "Status of account" %}
+                                {% endif %}
+
+                             </th>
+                            <th>{% trans "Actions" %}</th>
+                       </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        {% for client in clients %}
+                            <tr class="{% cycle '' 'zebra' %}">
+                                <td>{{client.first_name|title}}</td>
+                                <td>{{client.email|default:'-'}}</td>
+                                <td class="{% if not client.phone %}align-center{%endif%}">{{client.phone|default:'-'}}</td>
+                                <td class="">
+
+                                    <div class="switcher state-component {% if client.active == True %}active{% endif %}" id="" data-id="{{client.id}}" data-type="profil" data-attr="active">
+                                       <div class="handler animate"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="#" data-id="{{client.id}}" data-name="{{client.first_name}}" data-mail="{{client.email|default:'-'}}" data-action="send" class="send-action action-td" data-uid="{{client.client.uid}}" data-email="{{client.email}}">
+                                        {% if LANGUAGE_CODE == "fr" %}
+                                          Partager les accés des rapports
+                                        {% else %}
+                                           Share report access
+                                        {% endif %}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="tr-empty none">
+                            <td colspan="7" class="align-center">
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Aucun Résultats
+                                {% else %}
+                                   {% trans "No result" %}
+                                {% endif %}
+
+                                </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="footer-table relative"></div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if type == "publishers" %}
+
+    <div class="relative" id="">
+        <div class="white relative">
+           <div class="result-search absolute none white"></div>
+            <div class="table-normal">
+                <table class="sorted" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <thead>
+                       <tr>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Nom
+                                {% else %}
+                                   {% trans "Name" %}
+                                {% endif %}
+
+                                </th>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Adresse Email
+                                {% else %}
+                                   {% trans "Email address" %}
+                                {% endif %}
+
+                            </th>
+                            <th>
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Téléphone
+                                {% else %}
+                                   {% trans "Phone number" %}
+                                {% endif %}
+
+                                </th>
+                            <th>
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Statuts du Compte
+                                {% else %}
+                                   {% trans "Status of account" %}
+                                {% endif %}
+
+                             </th>
+                            <th>{% trans "Actions" %}</th>
+                       </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        {% for publisher in publishers %}
+                            <tr class="{% cycle '' 'zebra' %}">
+                                <td>{{publisher.first_name|title}}</td>
+                                <td>{{publisher.email|default:'-'}}</td>
+                                <td class="{% if not profil.phone %}align-center{%endif%}">{{publisher.phone|default:'-'}}</td>
+                                <td class="">
+
+                                    <div class="switcher state-component {% if publisher.active == True %}active{% endif %}" id="" data-id="{{publisher.id}}" data-type="profil" data-attr="active">
+                                       <div class="handler animate"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="#" data-id="{{publisher.id}}" data-name="{{publisher.first_name}}" data-mail="{{publisher.email|default:'-'}}" data-action="send" class="send-action action-td">
+                                        {% if LANGUAGE_CODE == "fr" %}
+                                          Partager les accés des rapports
+                                        {% else %}
+                                           Share report access
+                                        {% endif %}
+
+                                    </a>
+
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="tr-empty none">
+                            <td colspan="7" class="align-center">
+
+                                {% if LANGUAGE_CODE == "fr" %}
+                                  Aucun Résultats
+                                {% else %}
+                                   {% trans "No result" %}
+                                {% endif %}
+
+                                </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="footer-table relative"></div>
+        </div>
+    </div>
+    
+    {% endif %}
+            
+    
+    <div class="top60 bottom-footer">{% include 'include/footer.html' %}</div>
+
+</div>   
+
+
+
+{% endblock %}
+{% block footer %}{% endblock %}
+
+
+
+{% block extra_js %}
+<script src="{% static 'js/app/libs/table/tablesort.min.js' %}"></script>
+   <script src="{% static 'js/app/libs/table/sorts/tablesort.number.min.js' %}"></script>
+    <script>
+        var uid_company = "{{uid}}";
+    </script>
+    <script src="{% static 'js/app/components/dist/accounts/accounts_dashboard.js' %}"></script>
+{% endblock %}

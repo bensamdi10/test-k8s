@@ -1,0 +1,240 @@
+{% extends 'base_account.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}
+
+{% if LANGUAGE_CODE == "fr" %}
+Créer un Compte utilisateur
+{% else %}
+   {% trans "Create a user account" %}
+{% endif %}
+
+
+{% endblock %}
+
+{% block header %}
+    {% include 'include/header_user.html' %}
+{% endblock %}
+
+{% block body %}
+<div class="top40 center-auto">
+    <div id="container-form" class="relative white border center-auto hidden" data-type="h">
+       <div id="left-form" class="full-width">
+           <div id="form-page">
+                
+                <form id="form-company" class="form-slider" action="/account/create-profil/" method="post">
+                  {% csrf_token %}
+                   <div class="slider-form-container relative">
+                        <div class="slide-form left">
+                            
+                            
+                            <div class="">
+                            
+                            <div class="inputs box30 white">
+                                
+                                <h1 class="light bottom30">
+                                    إنشاء حساب الملف الشخصي
+
+                                </h1>
+                                
+                                {% if message %}
+                                       <div class="notice {{status}}">{{message}}</div>
+                                    {% endif %}
+                                
+                                <p class="{% if form.errors.first_name %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        الإسم العائلي
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="first_name" class="required {% if form.errors.first_name %}error{% endif %}" value="{{form.first_name.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.first_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.first_name|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.last_name %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        الإسم الشخصي
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="last_name" class="required {% if form.errors.last_name %}error{% endif %}" value="{{form.last_name.value|default_if_none:''}}" data-rule="string"placeholder="Example : John" />
+                                    {% if form.errors.last_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.last_name|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.email %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        البريد الإلكتروني
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="email" class="required ltr {% if form.errors.email %}error{% endif %}" 
+                                    value="{% if form.email.value %}{{form.email.value}}{% else %}{{email}}{% endif %}" data-rule="email" placeholder="Example: example@example.com" />
+                                    {% if form.errors.email %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.email|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="{% if form.errors.type %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        نوع الحساب
+                                        
+                                         <span class="asterix">*</span></label>
+                                    
+                                    <select name="type" class="required" data-rule="string">
+                                        <option value="">اختر نوع الحساب </option>
+                                        <option value="author">حساب صانع محتوى </option>
+                                        <option value="user">حساب قارئ محتوى</option>
+                                    </select>
+                                </p>
+                                
+                                <div id="container-upload" class="relative bottom20 top20">
+                                       <div id="upload-space" class="relative box-drag-drop">
+                                           <input type="file" class="input-file-standard" name="photo" accept=".jpg, .jpeg, .png, .gif" />
+                                           <input type="hidden" class=" input-base64" data-rule="string" name="photo_base64" />
+                                            <div class="message-error-metric errors-message box26 align-center none"><h2></h2></div>
+                                            <div class="align-center absolute drag-background font13 top3">
+                                                    انقر لتحميل صورة<br />
+                                                    <span class="font13">التنسيقات المقبولة : *.jpg, *.png, *.gif <br />
+                                                    الحجم المناسب للصورة لا يجب أن يتعدى :  210x210
+                                                </span>
+                                                </div>
+                                            <div id="" class="row relative parent-children">
+                                                <div class="clr"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                                <p class="font12 top30"> <span class="asterix">*</span><span class="fade"> : 
+                                 
+                                 الحقول الإلزامية
+                                 
+                                 
+                                 </span></p>
+                                
+                            </div>
+                            
+                            </div>    
+                            
+                            <div class="align-center bottom40">
+                                
+                                <input type="button" value='التالي' class="border-bleu-violet next-slide" data-index="1" />
+                            </div>
+                           
+                        </div><!-- slide-form -->
+                        
+                        <div class="slide-form left">
+                            <div class="">
+                            
+                            <div class="inputs box30 white">
+                                
+                                <h1 class="light bottom30">
+                                    معلومات إضافية 
+
+                                </h1>
+                                
+                                <p class="{% if form.errors.gender %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        الجنس
+                                    <span class="asterix">*</span></label>
+                                    <select name="gender" data-rule="string" value="{{form.name.gender|default_if_none:""}}" class="required {% if form.errors.gender %}error{% endif %}">
+                                        <option value="">
+                                            
+                                            حدد الجنس 
+                                            
+                                        </option>
+                                        <option value="man">
+                                            
+                                            رجل
+                                        
+                                        </option>
+                                        <option value="woman">
+                                        
+                                            امراءة
+                                        
+                                        </option>
+                                        <option value="other">
+                                        
+                                            غير محدد
+                                        
+                                        </option>
+                                    </select>
+                                    {% if form.errors.gender %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.gender|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+
+                                <p class="{% if form.errors.password %}error-p{% endif %}">
+                                    <label>
+                                        
+                                            كلمة المرور
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="password" data-rule="password" name="password" placeholder='{% if LANGUAGE_CODE == "fr" %}Mot de passe doit contenir au moins 8 caractères{% else %}Password must contain at least 8 characters{% endif %}'  class="required ltr {% if form.errors.password %}error{% endif %}" />
+                                    {% if form.errors.password %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.password|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.confirm_password %}error-p{% endif %}">
+                                    <label>
+                                        
+                                            تأكيد كلمة المرور
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="password" data-rule="password" name="confirm_password" placeholder='{% if LANGUAGE_CODE == "fr" %}Mot de passe doit contenir au moins 8 caractères{% else %}Password must contain at least 8 characters{% endif %}'  class="required ltr {% if form.errors.confirm_password %}error{% endif %}" />
+                                    {% if form.errors.confirm_password %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.confirm_password|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="font12 top30"> <span class="asterix">*</span><span class="fade"> : 
+                                    الحقول الإلزامية
+                                
+                                </span></p>
+                                
+                            </div>
+                            
+                            </div>
+                            <div class="top30 align-center bottom30">
+                                <input type="button" value='عودة' class="gris-btn border-gris back-slide" />
+                               <input type="button" value='ارسل' class="border-green finish-slide" data-index="2" />
+                            </div>
+                            
+                        </div><!-- slide-form -->
+                        
+                        <div class="clr"></div>
+
+
+                    </div><!-- slider-form-container -->
+               </form>
+           </div><!-- box30 -->
+        </div><!-- left-form -->
+
+       
+        <div class="clr"></div>
+    </div><!-- container-form -->
+    <div id="container-pagination" class="top30 align-center"></div>
+</div> 
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+{% endblock %}
+
+
+{% block extra_js %}
+        <script>;
+        </script>
+{% endblock %}

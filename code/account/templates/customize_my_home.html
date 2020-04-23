@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% load static i18n thumbnail  %}
+
+{% get_current_language as LANGUAGE_CODE %}
+
+
+{% block popup %}
+
+
+{% endblock %}
+
+
+
+{% block content_menu_page %}
+
+
+
+{% endblock %}
+
+
+
+
+{% block body %}
+<div class="box30-desktop bottom30">
+    <div class="container center-auto container-mobile">
+        <div class="tabs-side relative" id="tabs-side-custom"  data-name="table">
+            <ul class="horizontal parent-ul">
+                <li class="bleu-color bold hover-fade pointer active">لوحة الألوان <span class="count-span">{{count_themes}}</span></li>
+                <li class="bleu-color bold hover-fade pointer">تصميمات <span class="count-span">{{count_layouts}}</span></li>
+            </ul>
+            <div class="clr"></div>
+
+        </div>
+    </div>
+</div>
+
+<div class="container center-auto">
+    <div class="container-tabs-side relative hidden">
+            <div class="slider-tabs-side relative">
+                <div class="tab-side tab">
+                    
+                    <div class="item-custom left border {% if request.profil.theme == 'default' %}active{% endif %}" data-theme="default">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/default.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Default Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border {% if request.profil.theme == 'dango' %}active{% endif %}" data-theme="dango">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/dango.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Dango Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border {% if request.profil.theme == 'forest' %}active{% endif %}" data-theme="forest">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/forest.png' %}" />
+
+                        </div>
+                        <div class="text-item">
+                            <h3>Forest Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border noLeft {% if request.profil.theme == 'fushia' %}active{% endif %}" data-theme="fushia">
+                        <div class="preview-item">
+                                <img src="{% static 'images/themes/fushia.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Fushia Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    
+                    
+                    <div class="item-custom left border  {% if request.profil.theme == 'gold' %}active{% endif %}" data-theme="gold">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/gold.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Gold Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border {% if request.profil.theme == 'imperial' %}active{% endif %}" data-theme="imperial">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/imperial.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Imperial Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border {% if request.profil.theme == 'mint' %}active{% endif %}" data-theme="mint">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/mint.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Mint Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border noLeft {% if request.profil.theme == 'navy' %}active{% endif %}" data-theme="navy">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/navy.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Navy Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+
+                    <div class="item-custom left border  {% if request.profil.theme == 'pop' %}active{% endif %}" data-theme="pop">
+                        <div class="preview-item">
+                                <img src="{% static 'images/themes/pop.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Pop Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>                    
+                    
+                    <div class="item-custom left border {% if request.profil.theme == 'retro' %}active{% endif %}" data-theme="retro">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/retro.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Retro Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border {% if request.profil.theme == 'suryp' %}active{% endif %}" data-theme="suryp">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/suryp.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Suryp Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border noLeft {% if request.profil.theme == 'ultra' %}active{% endif %}" data-theme="ultra">
+                        <div class="preview-item">
+                            <img src="{% static 'images/themes/ultra.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Ultra Theme</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+
+
+
+
+
+                    <div class="clr"></div>
+
+                </div>
+                
+                
+                
+                <div class="tab-side tab" id="layouts-tab">
+                    <div class="item-custom left border  {% if profil.layout_home == 'default' %}active{% endif %}" data-layout="default">
+                        <div class="preview-item">
+                            <img src="{% static 'images/layouts/default.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Default Layout</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    <div class="item-custom left border  {% if profil.layout_home == 'scientist' %}active{% endif %}" data-layout="scientist">
+                        <div class="preview-item">
+                            <img src="{% static 'images/layouts/scientist.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Scientist Layout</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border  {% if profil.layout_home == 'flow' %}active{% endif %}" data-layout="flow">
+                        <div class="preview-item">
+                            <img src="{% static 'images/layouts/flow.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Flow Layout</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border noLeft  {% if request.profil.layout_home == 'edge' %}active{% endif %}" data-layout="edge">
+                        <div class="preview-item">
+                            <img src="{% static 'images/layouts/edge.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Edge Layout</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="item-custom left border  {% if request.profil.layout_home == 'astra' %}active{% endif %}" data-layout="astra">
+                        <div class="preview-item">
+                            <img src="{% static 'images/layouts/astra.png' %}" />
+                        </div>
+                        <div class="text-item">
+                            <h3>Astra Layout</h3>
+                            <div class="align-center"><span class="state-item animate"></span></div>
+                        </div>
+
+                    </div>
+                    
+                    
+                    
+                </div>
+                
+                
+            </div>
+    </div>
+
+
+</div>
+
+
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="{% static 'js/site/scripts/dist/custom_home.js' %}"></script>
+{% endblock %}
+
+

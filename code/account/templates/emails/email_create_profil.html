@@ -1,0 +1,22 @@
+{% extends "base_email.html" %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+
+
+{% block header %}
+                    
+    {% include "include_email/header_email.html" with header_text_1="السلام عليكم و مرحبا بكم" header_text_1=profil_name  %}
+
+{% endblock %}
+
+{% block img_header %}
+    <img src="http://recto-post.com/static/images/emails/profil.png" />
+{% endblock %}
+
+{% block content %}
+                    
+    {% include "include_email/content_email.html" with content="لقد توصلت بهذه الرسالة الإلكترونية لإعلامك بأن حسابك قد فعل و يمكنك الآن تسجيل الدخول والوصول إلى مساحة العمل لإدارة المحتوى الخاص بك" url_btn=url_redirection img_btn="https://recto-post.com/static/images/emails/btn_login.png" %}
+
+{% endblock %}
+

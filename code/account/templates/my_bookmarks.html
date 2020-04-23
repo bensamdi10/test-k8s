@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static i18n thumbnail  %}
+{% load format_value %}
+
+{% block body %}
+
+<div id="body-home">
+
+    
+
+
+
+
+
+
+
+
+    <div class="container center-auto top40 bottom40">
+        <h1 class="bold bottom30 border-bottom box5">مقالات مفضلتي</h1>
+        <div class="content-page relative center-auto" id='{{request.profil.layout_home}}-layout'>
+
+            {% for article in articles_not_read %}
+            
+                {% if request.profil.layout_home == "default" %}
+                    {% include "layouts/component_default.html" with grand='no' %}
+                {% endif %}
+
+                {% if request.profil.layout_home == "scientist" %}
+                    {% include "layouts/component_scientist.html"  %}
+                {% endif %}
+
+                {% if request.profil.layout_home == "flow" %}
+                    {% include "layouts/component_flow.html"  %}
+                {% endif %}
+
+                {% if request.profil.layout_home == "edge" %}
+                    {% include "layouts/component_edge.html"  %}
+                {% endif %}
+
+                {% if request.profil.layout_home == "astra" %}
+                    {% include "layouts/component_astra.html" with page='bookmark'  %}
+                {% endif %}
+
+
+
+            {% endfor %}
+            <div class="clr"></div>
+            
+            <div id="cursor-more" data-type="author" data-id="{{author.id}}"></div>
+            
+            
+            <div class="clr"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

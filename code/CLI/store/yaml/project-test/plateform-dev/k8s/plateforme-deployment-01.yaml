@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: plateforme-deployment-01-deployment
+spec:
+    replicas: '2'
+    selector:
+        matchLabels:
+            component: plateforme-deployment-01
+    template:
+        metadata:
+            labels:
+                component: plateforme-deployment-01
+        spec:
+            containers:
+            -   args: python /app/plateforme/manage.py runserver 8000
+                command: /bin/sh
+                env:
+                -   name: HOST
+                    value: localhost
+                -   name: port
+                    value: '4532'
+                -   name: DB_NAME_PLATEFORME
+                    value: plateforme
+                -   name: DB_NAME_DB
+                    value: plateforme_db
+                -   name: PASSWORD
+                    valueFrom:
+                        secretKeyRef:
+                            key: PASSWORD
+                            name: PASSWORD
+                image: said10/plateforme
+                name: plateforme
+                ports:
+                -   containerPort: '8000'
+                volumeMounts:
+                -   mountPath: /etc/app
+                    name: media_volume
+                    subPath: app
+            volumes:
+            -   name: media_volume
+                persistentVolumeClaim:
+                    claimName: media_volume-persistent-volume-claim

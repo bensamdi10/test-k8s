@@ -1,0 +1,244 @@
+{% extends 'base_account.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}
+إنشاء حساب الكاتب
+{% endblock %}
+
+{% block header %}
+    {% include 'include/header_author.html' %}
+{% endblock %}
+
+{% block body %}
+<div class=" center-auto top40">
+    <div id="container-form" class="relative white border center-auto hidden" data-type="h">
+       <div id="left-form" class="full-width">
+           <div id="form-page">
+                
+                <form id="form-company" class="form-slider" action="{{ request.get_full_path }}" method="post">
+                  {% csrf_token %}
+                   <div class="slider-form-container relative">
+                        <div class="slide-form left">
+                            <div class="">
+                            
+                            <div class="inputs box40 white">
+                                
+                                <h1 class="bold bottom30">
+                                    إنشاء حساب الكاتب
+
+                                </h1>
+                                
+                                <p class="{% if form.errors.first_name %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        الإسم العائلي
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="first_name" class="required {% if form.errors.first_name %}error{% endif %}" value="{{form.first_name.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.first_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.first_name|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.last_name %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        الإسم الشخصي
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="last_name" class="required {% if form.errors.last_name %}error{% endif %}" value="{{form.last_name.value|default_if_none:''}}" data-rule="string"placeholder="Example : John" />
+                                    {% if form.errors.last_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.last_name|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                <p class="{% if form.errors.email %}error-p{% endif %}">
+                                    <label>
+                                        
+                                        البريد الإلكتروني
+                                        
+                                         <span class="asterix">*</span></label>
+                                    <input type="text" name="email" class="required ltr {% if form.errors.email %}error{% endif %}" 
+                                    value="{% if form.email.value %}{{form.email.value}}{% else %}{{email}}{% endif %}" data-rule="email"  placeholder="Example : example@example.com" />
+                                    {% if form.errors.email %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.email|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                {% comment %}
+                                
+                                <div class="div-p relative">
+                                   <label>
+                                         الصورة
+                                    </label>
+
+
+
+                                    <div id="container-upload" class="relative">
+                                       <div id="upload-space" class="relative box-drag-drop">
+                                           <input type="file" class="input-file-standard" name="photo" accept=".jpg, .jpeg, .png, .gif" />
+                                           <input type="hidden" class=" input-base64" data-rule="string" name="photo_base64" />
+                                            <div class="message-error-metric errors-message box26 align-center none"><h2></h2></div>
+                                            <div class="align-center absolute drag-background font18">
+                                                    انقر لتحميل صورة<br />
+                                                    <span class="font13">التنسيقات المقبولة : *.jpg, *.png, *.gif</span>
+                                                </div>
+                                            <div id="" class="row relative parent-children">
+                                                <div class="clr"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clr"></div>
+                                </div><!-- div-p upload input --->
+                                
+                                {% endcomment %}
+                                
+                                <p>
+                                    <label>عن المؤلف</label>
+                                    <textarea name="about" data-rule="string" placeholder="Example:Lorem Ipsum"></textarea>
+                                </p>
+                                
+                                
+                                
+                                <p class="font12 top30"> <span class="asterix">*</span><span class="fade"> : 
+                                 
+                                 الحقول الإلزامية
+                                 
+                                 
+                                 </span></p>
+                                
+                            </div>
+                            
+                            </div>    
+                            
+                            <div class="align-center bottom40">
+                                
+                                <input type="button" value='التالي' class="border-bleu-violet next-slide" data-index="1" />
+                            </div>
+                           
+                        </div><!-- slide-form -->
+                        
+                        
+                        <div class="slide-form left">
+                            <div class="">
+                            
+                            <div class="inputs box40 white">
+                                
+                                <h1 class="light bottom30">
+                                    معلومات إضافية
+
+                                </h1>
+                                
+                                <p class="{% if form.errors.website %}error-p{% endif %}">
+                                    <label>
+                                        موقع إلكتروني
+                                        
+                                        </label>
+                                    <input type="text" name="website" class="required ltr {% if form.errors.website %}error{% endif %}" value="{{form.website.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.first_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.website|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="{% if form.errors.facebook %}error-p{% endif %}">
+                                    <label>
+                                        رابط صفحة الفيسبوك
+                                        
+                                     </label>
+                                    <input type="text" name="facebook" class="required ltr {% if form.errors.facebook %}error{% endif %}" value="{{form.facebook.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.first_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.facebook|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="{% if form.errors.twitter %}error-p{% endif %}">
+                                    <label>
+                                        رابط صفحة تويتر
+                                        
+                                    </label>
+                                    <input type="text" name="twitter" class="required ltr {% if form.errors.twitter %}error{% endif %}" value="{{form.twitter.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.first_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.twitter|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="{% if form.errors.instagram %}error-p{% endif %}">
+                                    <label>
+                                        رابط صفحة انستاغرام
+                                        
+                                    </label>
+                                    <input type="text" name="instagram" class="required ltr {% if form.errors.instagram %}error{% endif %}" value="{{form.instagram.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.first_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.instagram|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="{% if form.errors.linkedin %}error-p{% endif %}">
+                                    <label>
+                                        رابط صفحة لينكدين
+                                        
+                                     </label>
+                                    <input type="text" name="linkedin" class="required ltr {% if form.errors.linkedin %}error{% endif %}" value="{{form.linkedin.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.first_name %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.linkedin|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="{% if form.errors.youtube %}error-p{% endif %}">
+                                    <label>
+                                        رابط لصفحة يوتيوب
+                                        
+                                     </label>
+                                    <input type="text" name="youtube" class="required ltr {% if form.errors.youtube %}error{% endif %}" value="{{form.youtube.value|default_if_none:''}}" data-rule="string" placeholder="Example : Doe" />
+                                    {% if form.errors.youtube %}
+                                        <span class="message-error-input"><span class="inline-block">{{form.errors.youtube|striptags}}</span></span>
+                                    {% endif %}
+                                </p>
+                                
+                                <p class="font12 top30"> <span class="asterix">*</span><span class="fade"> : 
+                                الحقول الإلزامية
+                                
+                                </span></p>
+                                
+                            </div>
+                            
+                            </div>
+                            <div class="align-center bottom40">
+                                <input type="button" value='عودة' class="border-gris back-slide" />
+                               <input type="button" value='ارسل' class="border-green finish-slide" data-index="2" />
+                            </div>
+                            
+                        </div><!-- slide-form -->
+                        
+                        
+                        <div class="clr"></div>
+
+
+                    </div><!-- slider-form-container -->
+               </form>
+           </div><!-- box30 -->
+        </div><!-- left-form -->
+
+       
+        <div class="clr"></div>
+    </div><!-- container-form -->
+    <div id="container-pagination" class="top30 align-center"></div>
+</div> 
+      
+      
+      
+      
+      
+      
+      
+      
+      
+{% include 'include/footer.html' %}
+      
+      
+
+{% endblock %}
+
+
+{% block extra_js %}
+        <script>
+        </script>
+{% endblock %}

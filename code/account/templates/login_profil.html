@@ -1,0 +1,94 @@
+{% extends 'base_account.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}
+  تسجيل الدخول إلى حسابك
+{% endblock %}
+
+
+
+{% block header %}
+    {% include 'include/header_user.html' %}
+{% endblock %}
+
+{% block title-page %}تسجيل الدخول إلى حسابك{% endblock %}
+
+{% block body %}
+
+
+<div class="top40">
+    <div id="container-form" class="relative white border center-auto" data-type="v">
+       <div id="left-form" class="full-width">
+           <div class="box30 theme-default">
+                <h1 class="light bottom30">
+                      تسجيل الدخول إلى حسابك
+                </h1>
+                
+                
+                <form id="form-company" class="form-slider" action="{{ request.get_full_path }}" method="post">
+                  {% csrf_token %}
+                        <div class="inputs">
+                           {% if message %}
+                               <div class="notice">{{message}}</div>
+                            {% endif %}
+                            <p class="{% if form.errors.email %}error-p{% endif %}">
+                                <label class="block bottom5">
+
+                                    البريد الإلكتروني
+
+                                    <span class="asterix">*</span></label>
+                                <input type="text" name="email" class="required ltr {% if form.errors.email %}error{% endif %}" value="{{form.email.value|default_if_none:''}}" data-rule="email" placeholder="example : example@example.com" />
+                                {% if form.errors.email %}
+                                    <span class="message-error-input"><span class="inline-block">{{form.errors.email|striptags}}</span></span>
+                                {% endif %}
+                            </p>
+                            <p class="{% if form.errors.password %}error-p{% endif %}">
+                                <label class="block bottom5">
+
+                                    كلمة المرور
+
+                                     <span class="asterix">*</span></label>
+                                <input type="password" name="password" class="required ltr {% if form.errors.password %}error{% endif %}" value="{{form.password.value|default_if_none:''}}" data-rule="password" placeholder='يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل}' />
+                                {% if form.errors.password %}
+                                    <span class="message-error-input"><span class="inline-block">{{form.errors.password|striptags}}</span></span>
+                                {% endif %}
+                            </p>
+                            <p class="font12"> <span class="asterix">*</span><span class="fade"> : 
+
+                                الحقول الإلزامية
+
+                                </span></p>
+                            <div class="top30 align-center">
+                                <input type="button" value='تسجيل الدخول' class="border-green finish-slide" data-index="1" />
+                            </div>
+
+                            <div class="align-center top30">
+                                <a href="/account/forget-password/" class="bleu-color hover-souligner">
+
+                                   نسيت كلمة المرور ؟
+
+                                   </a>
+                            </div>
+
+
+                        </div><!-- inputs -->
+                        <div class="clr"></div>
+                    
+                    
+                    
+               </form>
+           </div><!-- box30 -->
+        </div><!-- left-form -->
+        <div class="clr"></div>
+    </div><!-- container-form -->
+</div> 
+
+
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'backend/js/components/dist/common/form_mini.js' %}"></script>
+{% endblock %}
+{% block extra_js %}
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}
+
+تحديث اهتماماتي
+
+
+{% endblock %}
+
+{% block popup_signup %}{% endblock %}
+
+
+{% block body %}
+
+      
+<div class="container center-auto hidden-mobile">
+    <h1 class="bottom60 top60 align-center bold">تحديث اهتماماتي</h1>
+    <div class="error font18 box30 none bottom30" id="message-error"></div>
+    
+    {% for centre in centres %}
+        
+        
+        <div class="list-centres relative">
+            <h2 class="border-bottom bottom30 bold">{{centre.name}}</h2>
+            
+            {% for topic in centre.topics %}
+                <div class="item-centre left pointer border relative animate bottom30 {% if topic.selected == True %}active{% endif %}  {% if forloop.counter|divisibleby:'4' %}noLeft{% endif %} {% if forloop.counter|divisibleby:'2' %}noLeftMobile{% endif %}">
+
+                    <div class="image-centre align-center"><img class="block" src="/media/{{topic.thumbnail}}" alt="{{topic.name}}" /></div>
+
+                    <div class="box20 relative">
+                         <span class="check-item absolute" data-uid="{{topic.uid}}"></span>
+                        <h3 class="bold">{{topic.name}}</h3>
+                        <p class="gris">{{topic.description}}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <div class="clr"></div>
+        </div> 
+    {% endfor %}
+    <div class="clr"></div>
+    
+    <div class="top60 bottom60 align-center">
+        <input type="button" class="border-green" value="حفظ التغييرات" id="finish-account" />
+    </div>
+    
+    
+    
+
+
+</div>
+      
+      
+      
+      
+      
+      
+      
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script type="text/javascript">
+    var current_language = "en";
+    var id = "{{profil.id}}";
+    {% if update == True %}
+        var update = true;
+     var token_profil = "";
+    {% else %}
+        var update = false;
+        var token_profil = "{{profil.token}}";
+    {% endif %}
+    
+    
+</script>
+<script src="{% static '/js/site/scripts/dist/custom_centres.js' %}"></script>
+{% endblock %}

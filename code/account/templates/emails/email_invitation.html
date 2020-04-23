@@ -1,0 +1,20 @@
+{% extends "base_email.html" %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+
+{% block header %}
+                    
+    {% include "include_email/header_email.html" with header_text_1="دعوة بالبريد الإلكتروني" header_text_1="لإنشاء حساب المستخدم الخاص بك"  %}
+
+{% endblock %}
+
+{% block img_header %}
+    <img src="http://recto-post.com/static/images/emails/invitation.png" />
+{% endblock %}
+
+{% block content %}
+                    
+    {% include "include_email/content_email.html" with content="لقد تلقيت دعوة لإنشاء حساب مستخدم على منصة ريكتو بوست" url_btn=url_redirection img_btn="https://recto-post.com/static/images/emails/bouton_invite.png" %}
+
+{% endblock %}

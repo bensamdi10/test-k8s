@@ -1,0 +1,24 @@
+{% load static i18n %}
+
+<div id="tool-bar" class="bleu-violet">
+        
+    <div class="side-column left">
+        <div class="box20">
+            <a href="#" class="overview uppercase bold">overview</a>
+        </div>
+
+    </div>
+    <div class="main-column right white-color" id="tabs-envs">
+        <ul class="horizontal">
+            {% for env in envs %}
+                <li class="fade-hover {% if current_env == env.uid %}active{% endif %}">{{env.name}}</li>
+            {% endfor %}
+            <li class="no-tab right">
+                <a href="#" class="add-environnement uppercase bold btn-action" data-action="add" data-element="environnement">Create New Environnement</a>
+            </li>
+        </ul>
+        <div class="clr"></div>
+    </div>
+    <div class="clr"></div>
+</div><!-- tool-bar --->
+    

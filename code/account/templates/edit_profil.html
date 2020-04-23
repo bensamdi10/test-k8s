@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static i18n thumbnail  %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block title %}	  
+تحديث الحساب
+
+{% endblock %}
+
+
+{% block body %}
+
+
+<div class="top40">
+    <div id="container-form" class="relative white border center-auto" data-type="v">
+       <div id="left-form" class="full-width">
+           <div class="box30 theme-default">
+                <h1 class="light bottom30">
+                    تحديث الحساب
+                </h1>
+                
+               
+               
+               <form action="{{ request.get_full_path }}" method="post" id="form-profil">
+                   
+                   
+                   <div class="inputs">
+                       
+                        {% if message %}
+                           <div class="notice">{{message}}</div>
+                        {% endif %}
+                       
+                        {% csrf_token %}
+                        <p class="{% if form.errors.first_name %}error-p{% endif %}">
+                            <label>
+
+                                الإسم العائلي
+
+                                <span class="asterix">*</span></label>
+                            <input type="text" name="first_name" class="required {% if form.errors.first_name %}error{% endif %}" value="{{form.first_name.value|default_if_none:''}}" data-rule="string" />
+                            {% if form.errors.first_name %}
+                                <span class="message-error-input"><span class="inline-block">{{form.errors.first_name|striptags}}</span></span>
+                            {% endif %}
+                        </p>
+                        <p class="{% if form.errors.last_name %}error-p{% endif %}">
+                            <label>
+
+                                سم الشخصي
+
+                                <span class="asterix">*</span></label>
+                            <input type="text" name="last_name" class="required {% if form.errors.last_name %}error{% endif %}" value="{{form.last_name.value|default_if_none:''}}" data-rule="string" />
+                            {% if form.errors.last_name %}
+                                <span class="message-error-input"><span class="inline-block">{{form.errors.last_name|striptags}}</span></span>
+                            {% endif %}
+                        </p>
+                        <p class="{% if form.errors.email %}error-p{% endif %}">
+                            <label>
+
+
+                                البريد الإلكتروني
+
+                                <span class="asterix">*</span></label>
+                            <input type="text" name="email" class="required ltr {% if form.errors.email %}error{% endif %}" value="{{form.email.value|default_if_none:''}}" data-rule="email" />
+                            {% if form.errors.email %}
+                                <span class="message-error-input"><span class="inline-block">{{form.errors.email|striptags}}</span></span>
+                            {% endif %}
+                        </p>
+                        <p class="{% if form.errors.phone %}error-p{% endif %}">
+                            <label>
+
+                                رقم الهاتف
+
+                                <span class="asterix">*</span></label>
+                            <input type="text" id="phone_number" name="phone" class="required ltr {% if form.errors.phone %}error{% endif %}" value="{{form.phone.value|default_if_none:""}}"  data-rule="phone" placeholder="+222 000 0000000" />
+                            {% if form.errors.phone %}
+                                <span class="message-error-input"><span class="inline-block">{{form.errors.phone|striptags}}</span></span>
+                            {% endif %}
+                        </p>
+                        <p class="font12"> <span class="asterix">*</span><span class="fade"> : 
+
+
+                            الحقول الإلزامية
+                          </span></p>
+                        <div class="align-center top30">
+                           <input type="submit" value='حفظ التغييرات' id="btn_update" class="border-green" />
+                        </div>
+                       
+                       
+                   </div>
+                    
+                </form>
+               
+               
+               
+           </div><!-- box30 -->
+        </div><!-- left-form -->
+        <div class="clr"></div>
+    </div><!-- container-form -->
+</div> 
+
+{% endblock %}
+
+

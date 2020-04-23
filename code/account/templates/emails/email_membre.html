@@ -1,0 +1,16 @@
+{% extends "base_email.html" %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+
+{% block content %}
+                    
+    {% include "include_email/content_confirmation.html" %}
+
+{% endblock %}
+
+{% block team %}
+
+    {% include "include_email/support_block.html" %}
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+
+{% block title %}
+ تحديث معلومات الأمان
+
+   
+
+
+{% endblock %}
+
+
+
+
+{% block body %}
+
+
+<div class="top40">
+    <div id="container-form" class="relative white border center-auto" data-type="v">
+       <div id="left-form" class="full-width">
+           <div class="box30 theme-default">
+                <h1 class="light bottom30">
+                    تحديث معلومات الأمان
+                </h1>
+               
+               
+               <form action="{{ request.get_full_path }}" method="post" id="form-profil">
+                   
+                   <div class="inputs">
+                       
+                         {% if message and type == "success" %}
+                           <div id="message-submit" class="success-message box20 align-center font18 bottom20">{{message}}</div>
+                           <script>
+                               setTimeout(function() {
+                                   location.href = "/accounts/login-profil";
+                               }, 3000);
+                          </script>
+                       {% endif %}
+                       {% if message and type == "error" %}
+                           <div id="message-submit" class="errors-message box20 align-center font18 bottom20">{{message}}</div>
+
+                       {% endif %}
+                       
+                       
+                       {% csrf_token %}
+                    <p class="{% if form.errors.current_password %}error-p{% endif %}">
+                        <label>
+
+                            كلمة المرور الحالية
+
+                            </label>
+                        <input type="password" name="current_password" class="required ltr {% if form.errors.current_password %}error{% endif %}" value="{{form.current_password.value|default_if_none:''}}" data-rule="string" placeholder="Example : XXXXXXXX" />
+                        {% if form.errors.current_password %}
+                            <span class="message-error-input"><span class="inline-block">{{form.errors.current_password|striptags}}</span></span>
+                        {% endif %}
+                    </p>
+                    <p class="{% if form.errors.new_password %}error-p{% endif %}">
+                        <label>
+                                كلمة المرور الجديدة
+
+                            </label>
+                        <input type="password" name="new_password" class="required ltr {% if form.errors.new_password %}error{% endif %}" value="{{form.new_password.value|default_if_none:''}}" data-rule="string" placeholder='يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل' />
+                        {% if form.errors.new_password %}
+                            <span class="message-error-input"><span class="inline-block">{{form.errors.new_password|striptags}}</span></span>
+                        {% endif %}
+                    </p>
+                    <p class="{% if form.errors.confirm_new_password %}error-p{% endif %}">
+                        <label>
+
+                            تأكيد كلمة المرور الجديدة
+
+                            </label>
+                        <input type="password" name="confirm_new_password" class="required ltr {% if form.errors.confirm_new_password %}error{% endif %}" value="{{form.confirm_new_password.value|default_if_none:''}}" data-rule="string" placeholder='يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل' />
+                        {% if form.errors.confirm_new_password %}
+                            <span class="message-error-input"><span class="inline-block">{{form.errors.confirm_new_password|striptags}}</span></span>
+                        {% endif %}
+                    </p>
+                    <div class="align-center top30">
+                       <input type="submit" value='حفظ التغييرات' id="btn_update" class="border-green" />
+                    </div>
+                   
+                       
+                       
+                   </div>
+                </form>
+               
+           </div><!-- box30 -->
+        </div><!-- left-form -->
+        <div class="clr"></div>
+    </div><!-- container-form -->
+</div> 
+
+
+{% endblock %}
+
