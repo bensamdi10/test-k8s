@@ -1,2 +1,3 @@
 channels
 asgi_redis
+Django==3.0.3
