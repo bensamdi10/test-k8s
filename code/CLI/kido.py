@@ -38,6 +38,6 @@ def stop(config):
 @pass_config
 def update(config):
     """ Update the Project in the Kido Server """
-    click.echo("The Server is updated the Files for your project CLI")
+    click.echo("The Server is updated the Files for your project")
 
 
