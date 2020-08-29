@@ -32,12 +32,12 @@ def start(config):
 @pass_config
 def stop(config):
     """ Stop the Kido Server """
-    click.echo("The Server is Stopped")
+    click.echo("The Server is Stopped CLI")
 
 @cli.command()
 @pass_config
 def update(config):
     """ Update the Project in the Kido Server """
-    click.echo("The Server is updated the Files for your project")
+    click.echo("The Server is updated the Files for your project CLI")
 
 
