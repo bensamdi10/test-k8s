@@ -20,6 +20,7 @@ class Home(TemplateViewSite):
     def get(self, request):
 
         projects = Project.objects.all().filter(archive=False)
+		print("test")
         return render(request, self.template_name, { "projects" : projects })
 
 class Workspace(TemplateViewSite):
