@@ -1,4 +1,6 @@
 {
     "project" : "project-reto-post",
-    "env" : "recto-post-prod-env"
+    "env" : "recto-post-prod-env",
+    "service" : "deploy test",
+    "name" : "test-k8s"
 }
