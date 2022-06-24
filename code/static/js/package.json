@@ -32,7 +32,7 @@
     "grunt-jsxhint": "^0.8.0",
     "invock-js": "^1.2.0",
     "jsdoc-babel": "^0.2.1",
-    "jsdom": "^12.0.0",
+    "jsdom": "^16.5.0",
     "keyword-extractor": "0.0.18",
     "load-grunt-tasks": "^3.4.1",
     "mammoth": "^1.4.9",
